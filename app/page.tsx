@@ -1,5 +1,5 @@
-import EventApp from "./EventApp";
+import HomeApp from "./HomeApp";
 
 export default function Home() {
-  return <EventApp mode="landing" />;
+  return <HomeApp />;
 }

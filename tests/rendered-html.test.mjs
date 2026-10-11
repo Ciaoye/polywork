@@ -13,15 +13,16 @@ async function render(pathname) {
   );
 }
 
-test("renders the activity landing page with both live entry points", async () => {
+test("renders the permanent archive-style home and event entry", async () => {
   const response = await render("/");
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<title>你在做什么？怎么做？｜多元工作与多元收入聊天会<\/title>/);
-  assert.match(html, /一场关于多元工作、多元收入/);
-  assert.match(html, /href="\/join"/);
-  assert.match(html, /href="\/host"/);
-  assert.match(html, /十二个问题/);
+  assert.match(html, /大家是怎么活着的/);
+  assert.match(html, /href="\/1012\/"/);
+  assert.match(html, /按点赞从多到少排列/);
+  assert.match(html, /home-page/);
+  assert.doesNotMatch(html, /participant-question-picker/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 

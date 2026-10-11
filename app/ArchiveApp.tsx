@@ -31,7 +31,7 @@ const interpretations: Record<string, string> = {
   "new-default": "新的默认答案还没有收敛：有人想要项目制和合作网络，有人重视基本保障、公共支持与互相依赖。共同方向是让生活不再只围绕一份职位来组织。",
 };
 
-function responseText(question: Question, data: Record<string, string | number>) {
+export function responseText(question: Question, data: Record<string, string | number>) {
   if (question.type === "dual") return `舒服：${data.comfortable || "—"}\n真累：${data.tired || "—"}`;
   if (question.type === "earning") return `这件事：${data.story || "—"}\n赚了：${data.amount || "—"}\n还想再做：${data.again || "未回答"}`;
   if (question.type === "spectrum") return `${data.value ?? "—"} / 100${data.reason ? `\n${data.reason}` : ""}`;

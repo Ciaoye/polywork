@@ -11,8 +11,8 @@ import { sitePath } from "../lib/site-paths";
 const questions = questionsForSession(currentSession());
 
 type Mode = "landing" | "participant" | "host";
-type AnswerData = Record<string, string | number>;
-type EventResponse = {
+export type AnswerData = Record<string, string | number>;
+export type EventResponse = {
   id: string;
   sessionId?: string;
   questionId: string;
@@ -65,7 +65,7 @@ function answerText(question: Question, data: AnswerData) {
   return String(data.text || "");
 }
 
-function hasMinimumAnswer(question: Question, data?: AnswerData) {
+export function hasMinimumAnswer(question: Question, data?: AnswerData) {
   return Boolean(data && Array.from(answerText(question, data).replace(/\s/g, "").trim()).length >= MIN_ANSWER_LENGTH);
 }
 
@@ -153,7 +153,7 @@ function staticSnapshot(text: string, participantId: string, requestedQuestion?:
   });
 }
 
-async function sendAction(payload: Record<string, unknown>) {
+export async function sendAction(payload: Record<string, unknown>) {
   const response = await fetch(participantApiEndpoint(), {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -173,7 +173,7 @@ function pendingVotes(participantId: string): PendingVote[] {
 function savePendingVotes(participantId: string, votes: PendingVote[]) {
   localStorage.setItem(voteKey(participantId), JSON.stringify(votes));
 }
-function useSnapshot(participantId: string, endpoint = "/api/event", questionIndex?: number, mode: EventMode = "live") {
+export function useSnapshot(participantId: string, endpoint = "/api/event", questionIndex?: number, mode: EventMode = "live") {
   const [source, setSource] = useState<Snapshot>(emptySnapshot);
   const [historical, setHistorical] = useState<EventResponse[]>([]);
   const [error, setError] = useState("");
@@ -274,7 +274,7 @@ function useSnapshot(participantId: string, endpoint = "/api/event", questionInd
   return { snapshot, setSnapshot: setSource, error, ready, refresh, clearError: () => setError("") };
 }
 
-function mergeResponses(primary: EventResponse[], secondary: EventResponse[]) {
+export function mergeResponses(primary: EventResponse[], secondary: EventResponse[]) {
   const merged = new Map(secondary.map((response) => [response.id, response]));
   for (const response of primary) {
     const old = merged.get(response.id);
@@ -389,7 +389,7 @@ function Landing() {
   );
 }
 
-function getParticipantId() {
+export function getParticipantId() {
   if (typeof window === "undefined") return "";
   const key = "polywork-participant-id";
   let id = window.localStorage.getItem(key);
@@ -407,7 +407,7 @@ function getParticipantId() {
   return id;
 }
 
-function initialData(question: Question): AnswerData {
+export function initialData(question: Question): AnswerData {
   if (question.type === "spectrum") return { value: 50, reason: "" };
   if (question.type === "dual") return { comfortable: "", tired: "" };
   if (question.type === "earning") return { story: "", amount: "", again: "" };
@@ -560,7 +560,7 @@ function Participant() {
               <b>你可以自由选择回答哪一题</b>
               <span>{currentSession() === "open" ? "不填写也可以查看大家的全部回答" : "主持人切题不会打断你正在写的内容"}</span>
             </div>
-            <div className={`participant-question-picker ${currentSession() === "open" ? "home-question-picker" : ""}`}>
+            <div className="participant-question-picker">
               {questions.map((question, index) => (
                 <button
                   className={index === snapshot.questionIndex ? "active" : ""}
@@ -568,7 +568,7 @@ function Participant() {
                   type="button"
                   onClick={() => setSelectedQuestion(index)}
                   aria-label={`查看第 ${index + 1} 题：${question.title}`}
-                >{currentSession() === "open" ? <><span>{question.number}</span><span>{question.title}</span></> : index + 1}</button>
+                >{index + 1}</button>
               ))}
             </div>
           </nav>
@@ -609,7 +609,7 @@ function Participant() {
   );
 }
 
-function QuestionFields({ question, form, setForm }: { question: Question; form: AnswerData; setForm: React.Dispatch<React.SetStateAction<AnswerData>> }) {
+export function QuestionFields({ question, form, setForm }: { question: Question; form: AnswerData; setForm: React.Dispatch<React.SetStateAction<AnswerData>> }) {
   const update = (key: string, value: string | number) => setForm((current) => ({ ...current, [key]: value }));
   if (question.type === "dual") return <div className="dual-fields">
     <label><span>☺ 最近一次觉得“真舒服”</span><textarea value={String(form.comfortable ?? "")} onChange={(event) => update("comfortable", event.target.value)} placeholder="写一个具体的瞬间……" maxLength={1000} /></label>
