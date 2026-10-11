@@ -27,15 +27,6 @@ const headers = {
   "content-type": "application/json; charset=utf-8",
 };
 
-// GET snapshots are safe to cache briefly: they contain only the current
-// question and anonymous answers, while POST responses always return fresh
-// data. This lets the gateway/browser coalesce bursts instead of invoking the
-// function for every identical read.
-const snapshotHeaders = {
-  ...headers,
-  "cache-control": "public, max-age=2, stale-while-revalidate=8",
-};
-
 function reply(statusCode, value, responseHeaders = headers) {
   return { statusCode, headers: responseHeaders, body: JSON.stringify(value), isBase64Encoded: false };
 }
@@ -83,6 +74,16 @@ function hasMinimumAnswer(questionId, data) {
   return Array.from(answerText(questionId, data).replace(/\s/g, "").trim()).length >= MIN_ANSWER_LENGTH;
 }
 
+async function readAll(filter) {
+  const data = [];
+  for (let offset = 0; ; offset += 100) {
+    const page = rows(await collection.where(filter).skip(offset).limit(100).get());
+    data.push(...page);
+    if (page.length < 100) break;
+  }
+  return { data };
+}
+
 async function getState() {
   const result = await collection.doc("state").get();
   const current = first(result);
@@ -97,13 +98,13 @@ async function getState() {
   return { _id: "state", ...initial };
 }
 
-async function snapshot(participantId, requestedQuestion) {
+async function snapshot(participantId, requestedQuestion, all = false) {
   const state = await getState();
   const questionIndex = boundedQuestion(requestedQuestion, boundedQuestion(state.activeQuestion));
   const questionId = questionIds[questionIndex];
   const [responseResult, reactionResult] = await Promise.all([
-    collection.where({ kind: "response", questionId }).limit(1000).get(),
-    collection.where({ kind: "reaction", questionId }).limit(1000).get(),
+    readAll({ kind: "response", ...(all ? {} : { questionId }) }),
+    readAll({ kind: "reaction", ...(all ? {} : { questionId }) }),
   ]);
   const reactions = rows(reactionResult);
   const reactionCount = new Map();
@@ -117,6 +118,7 @@ async function snapshot(participantId, requestedQuestion) {
     .map((response) => ({
       id: response._id,
       questionId: response.questionId,
+      sessionId: response.sessionId || "legacy",
       participantId: response.participantId,
       data: response.data || {},
       hidden: Boolean(response.hidden),
@@ -125,8 +127,6 @@ async function snapshot(participantId, requestedQuestion) {
       reacted: reacted.has(response._id),
       updatedAt: response.updatedAt,
     }));
-  const ownResponse = responses.find((response) => response.participantId === participantId);
-  const isHost = participantId === "host";
   return {
     state: {
       activeQuestion: boundedQuestion(state.activeQuestion),
@@ -135,9 +135,8 @@ async function snapshot(participantId, requestedQuestion) {
     },
     questionIndex,
     totalQuestions: questionIds.length,
-    responses: isHost || hasMinimumAnswer(questionId, ownResponse?.data)
-      ? responses
-      : responses.filter((response) => response.participantId === participantId),
+    responses: responses.filter((response) => response.questionId === questionId),
+    ...(all ? { allResponses: responses } : {}),
     joinUrl: process.env.PARTICIPANT_JOIN_URL || "",
   };
 }
@@ -164,10 +163,13 @@ async function act(payload) {
     if (!hasMinimumAnswer(questionId, payload.data)) {
       return reply(400, { error: `回答至少需要 ${MIN_ANSWER_LENGTH} 个字` });
     }
-    const id = stableId(questionId, participantId);
+    const sessionId = String(payload.sessionId || "open");
+    if (!["open", "2026-10-12"].includes(sessionId)) return reply(400, { error: "场次不存在" });
+    const id = stableId(sessionId, questionId, participantId);
     const existing = first(await collection.doc(id).get());
     await collection.doc(id).set({
       kind: "response",
+      sessionId,
       questionId,
       participantId,
       data: payload.data,
@@ -176,7 +178,7 @@ async function act(payload) {
       createdAt: existing?.createdAt || now,
       updatedAt: now,
     });
-    return reply(200, await snapshot(participantId, viewQuestion));
+    return reply(200, await snapshot(participantId, viewQuestion, Boolean(payload.all)));
   }
 
   if (payload.action === "react") {
@@ -192,7 +194,7 @@ async function act(payload) {
     } else {
       await collection.doc(reactionId).set({ kind: "reaction", responseId, questionId: response.questionId, participantId, createdAt: now });
     }
-    return reply(200, await snapshot(participantId, viewQuestion));
+    return reply(200, await snapshot(participantId, viewQuestion, Boolean(payload.all)));
   }
 
   if (payload.action === "setQuestion") {
@@ -241,7 +243,7 @@ exports.main = async (event) => {
   try {
     if (method === "GET") {
       const query = event.queryStringParameters || {};
-      return reply(200, await snapshot(String(query.participant || ""), query.question), snapshotHeaders);
+      return reply(200, await snapshot(String(query.participant || ""), query.question, query.all === "1"), headers);
     }
     if (method === "POST") return await act(parseBody(event));
     return reply(405, { error: "不支持的请求方式" });

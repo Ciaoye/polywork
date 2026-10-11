@@ -109,16 +109,12 @@ async function snapshot(participantId = "", requestedQuestion?: number) {
       reactionCount: Number(row.reaction_count),
       reacted: reacted.has(row.id),
     }));
-  const ownResponse = responses.find((response) => response.participantId === participantId);
-  const isHost = participantId === "host";
   return {
     state: { activeQuestion, revealAnswers: Boolean(state?.reveal_answers), updatedAt: state?.updated_at },
     questionIndex: index,
     question,
     totalQuestions: questions.length,
-    responses: isHost || hasMinimumAnswer(question.id, ownResponse?.data ?? {})
-      ? responses
-      : responses.filter((response) => response.participantId === participantId),
+    responses,
   };
 }
 

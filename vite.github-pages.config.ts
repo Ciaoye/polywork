@@ -1,7 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const repositoryName = process.env.GITHUB_REPOSITORY?.split("/").pop() || "polywork-income-conversation";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/").pop() || "polywork";
 
 export default defineConfig({
   root: "cloudbase-web",
