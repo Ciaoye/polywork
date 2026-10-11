@@ -247,9 +247,12 @@ function mergeResponses(primary: EventResponse[], secondary: EventResponse[]) {
 
 function HistoryAnswers({ snapshot }: { snapshot: Snapshot }) {
   const history = (snapshot.historyResponses || []).filter((response) => response.questionId === snapshot.question.id && !response.hidden);
-  return <details className="history-answers"><summary>展开历史回答 · {snapshot.loaded ? `${history.length} 条` : "读取中"}</summary>
+  const frozenIds = new Set(history.map((response) => response.id));
+  const otherSessions = snapshot.responses.filter((response) => response.sessionId !== currentSession() && !response.hidden && !frozenIds.has(response.id));
+  return <details className="history-answers"><summary>展开历史回答 · {snapshot.loaded ? `${history.length + otherSessions.length} 条` : "读取中"}</summary>
     <p className="history-note">活动开始前保存的回答；各场次分开保留。</p>
     <div className="response-grid">{history.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId="archive" readOnly onAction={async () => {}} />)}</div>
+    {otherSessions.length ? <><h3>其他场次新增</h3><div className="response-grid">{otherSessions.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId="archive" readOnly onAction={async () => {}} />)}</div></> : null}
   </details>;
 }
 
@@ -396,11 +399,11 @@ function ResponseCard({ response, question, participantId, host, readOnly, onAct
   return (
     <article className={`response-card ${response.highlighted ? "highlighted" : ""} ${response.hidden ? "hidden-card" : ""}`}>
       <div className="card-topline">
-        <span>{response.highlighted ? "★ 主持人正在看这条" : own ? "这是我的回答" : "匿名回答"}</span>
+        <span>{response.highlighted ? (readOnly && response.sessionId !== currentSession() ? "★ 曾被高亮" : "★ 主持人正在看这条") : own ? "这是我的回答" : "匿名回答"}</span>
         {response.hidden ? <span>已隐藏</span> : null}
       </div>
       <ResponseContent response={response} question={question} />
-      <div className="card-actions">
+      {!readOnly ? <div className="card-actions">
         {!host && !readOnly && !response.hidden ? (
           <button className={`listen-button ${response.reacted ? "active" : ""}`} onClick={() => onAction({ action: "react", responseId: response.id, participantId })}>
             ◉ 想听展开 <b>{response.reactionCount || ""}</b>
@@ -411,7 +414,7 @@ function ResponseCard({ response, question, participantId, host, readOnly, onAct
           <button className="tiny-button" onClick={() => onAction({ action: "moderate", responseId: response.id, field: "hidden", value: !response.hidden })}>{response.hidden ? "恢复" : "隐藏"}</button>
           <span className="host-votes">◉ {response.reactionCount}</span>
         </> : null}
-      </div>
+      </div> : null}
     </article>
   );
 }
@@ -705,7 +708,7 @@ function Host() {
                 {snapshot.question.type === "spectrum" ? <SpectrumSummary responses={visibleResponses} /> : null}
                 {snapshot.question.type === "poll" || snapshot.question.type === "value" ? <PollSummary question={snapshot.question} responses={visibleResponses} /> : null}
                 <div className="response-grid host-grid">
-                  {distributeColumns(visibleResponses).map((columnItems, columnIndex) => <div className="host-col" key={columnIndex}>
+                  {distributeColumns(currentAnswers(snapshot)).map((columnItems, columnIndex) => <div className="host-col" key={columnIndex}>
                     {columnItems.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId="host" host readOnly={mode === "static"} onAction={act} />)}
                   </div>)}
                   {!visibleResponses.length ? <div className="empty-stage">{error || !ready ? "现场数据尚未确认" : "等待第一条回答"}<span className="blink-cursor">▮</span></div> : null}
