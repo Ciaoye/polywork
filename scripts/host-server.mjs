@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { execFile } from "node:child_process";
@@ -29,13 +30,12 @@ async function publish(snapshot) {
     branch = await github("git/refs", "POST", { ref: "refs/heads/live-data", sha: main.object.sha });
   }
   if (!branch) throw new Error("无法读取数据分支");
-  let sha;
-  try { sha = (await github("contents/snapshot.json?ref=live-data")).sha; } catch { /* First publication. */ }
   const published = { publishedAt: new Date().toISOString(), sessionState: snapshot.sessionState, allResponses: snapshot.allResponses.filter((item) => !item.hidden) };
-  await github("contents/snapshot.json", "PUT", { message: "Update shared event snapshot", branch: "live-data", ...(sha ? { sha } : {}), content: Buffer.from(JSON.stringify(published)).toString("base64") });
+  const snapshotPath = `snapshots/${Date.now()}-${randomUUID()}.json`;
+  await github(`contents/${snapshotPath}`, "PUT", { message: "Publish immutable event snapshot", branch: "live-data", content: Buffer.from(JSON.stringify(published)).toString("base64") });
   let signalSha;
   try { signalSha = (await github("contents/signal.json?ref=live-data")).sha; } catch { /* First signal. */ }
-  await github("contents/signal.json", "PUT", { message: "Notify event views of the published snapshot", branch: "live-data", ...(signalSha ? { sha: signalSha } : {}), content: Buffer.from(JSON.stringify({ publishedAt: published.publishedAt })).toString("base64") });
+  await github("contents/signal.json", "PUT", { message: "Notify event views of the published snapshot", branch: "live-data", ...(signalSha ? { sha: signalSha } : {}), content: Buffer.from(JSON.stringify({ publishedAt: published.publishedAt, snapshotPath })).toString("base64") });
 }
 async function readBody(request) {
   let text = "";

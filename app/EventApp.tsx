@@ -219,7 +219,10 @@ function useSnapshot(participantId: string, endpoint = "/api/event", questionInd
         if (!signalResponse.ok) return;
         const signal = await signalResponse.json();
         if (!active || !signal.publishedAt || signal.publishedAt === version) return;
-        const response = await fetch(`${publishedSnapshotUrl}?v=${encodeURIComponent(signal.publishedAt)}`, { cache: "no-store" });
+        const snapshotUrl = /^snapshots\/[A-Za-z0-9_-]+\.json$/.test(signal.snapshotPath || "")
+          ? publishedSnapshotUrl.replace("snapshot.json", signal.snapshotPath)
+          : `${publishedSnapshotUrl}?v=${encodeURIComponent(signal.publishedAt)}`;
+        const response = await fetch(snapshotUrl, { cache: "no-store" });
         if (!response.ok) return;
         const data = await response.json();
         if (!active || data.publishedAt !== signal.publishedAt) return;
@@ -245,7 +248,7 @@ function useSnapshot(participantId: string, endpoint = "/api/event", questionInd
           const sent = new Map(queued.map((vote) => [vote.responseId, vote.value]));
           savePendingVotes(participantId, pendingVotes(participantId).filter((vote) => !sent.has(vote.responseId) || sent.get(vote.responseId) !== vote.value));
           if (active) setSource(next);
-        } catch { /* Retry the retained votes on the next host refresh, never by polling Tencent. */ }
+        } catch (voteError) { console.warn("投票仍暂存，等待下一次主持刷新：", voteError instanceof Error ? voteError.message : "同步失败"); }
       } catch { /* Static refresh failures leave the current view intact. */ }
       finally { checking = false; }
     };
