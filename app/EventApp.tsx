@@ -575,7 +575,7 @@ function Participant() {
           <section className="participant-question">
             <p className="question-eyebrow">{snapshot.question.number} / {snapshot.question.eyebrow}</p>
             <h1>{snapshot.question.title}</h1>
-            <p className="question-prompt">{snapshot.question.prompt}</p>
+            {snapshot.question.prompt.trim() !== snapshot.question.title.trim() && <p className="question-prompt">{snapshot.question.prompt}</p>}
             <div className="question-detail">{snapshot.question.intro.map((paragraph) => <p className="short-intro" key={paragraph}>{paragraph}</p>)}</div>
           </section>
           <form className="answer-form win-outset" onSubmit={submit}>
@@ -747,7 +747,7 @@ function Host() {
             <div className="host-question">
               <p className="question-eyebrow">QUESTION {snapshot.question.number} / {snapshot.question.eyebrow}</p>
               <h1>{snapshot.question.title}</h1>
-              <blockquote>{snapshot.question.prompt}</blockquote>
+              {snapshot.question.prompt.trim() !== snapshot.question.title.trim() && <blockquote>{snapshot.question.prompt}</blockquote>}
               <div className="host-intro">{snapshot.question.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
             </div>
 

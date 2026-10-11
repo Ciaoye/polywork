@@ -171,7 +171,7 @@ export default function ArchiveApp() {
           return <article className="archive-question" key={question.id}>
             <div className="archive-question-heading"><div><p className="question-eyebrow">{question.number} / {question.eyebrow}</p><h2>{question.title}</h2></div><b>{questionResponses.length} 条</b></div>
             <div className="archive-question-copy">
-              <blockquote className="archive-question-prompt">{question.prompt}</blockquote>
+              {question.prompt.trim() !== question.title.trim() && <blockquote className="archive-question-prompt">{question.prompt}</blockquote>}
               <div className="archive-question-intro">{question.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
             </div>
             <p className="archive-interpretation"><b>回看这组回答：</b>{interpretations[question.id]}</p>

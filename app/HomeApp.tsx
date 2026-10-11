@@ -89,7 +89,7 @@ export default function HomeApp() {
         return <article className="archive-question home-question" id={`question-${question.id}`} key={question.id}>
           <div className="archive-question-heading"><div><p className="question-eyebrow">{question.number} / {question.eyebrow}</p><h2>{question.title}</h2></div><b>{ordered.length} 条</b></div>
           <div className="home-question-copy">
-            <p className="home-prompt">{question.prompt}</p>
+            {question.prompt.trim() !== question.title.trim() && <p className="home-prompt">{question.prompt}</p>}
             <div className="archive-question-intro"><p>{question.intro[0]}</p></div>
             {question.intro.length > 1 ? <details className="home-question-detail"><summary>展开更多背景说明</summary><div className="archive-question-intro">{question.intro.slice(1).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div></details> : null}
           </div>
