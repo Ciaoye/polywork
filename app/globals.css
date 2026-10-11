@@ -258,3 +258,28 @@ textarea:focus { border-color: #29261f; }
   .home-controls { padding: 14px; flex-direction: column; align-items: stretch; }.home-controls label, .home-controls p { flex: none; width: 100%; }.home-question { padding: 18px; }.home-question .archive-question-heading { gap: 9px; }.home-question .archive-question-heading h2 { font-size: 25px; }.home-question .archive-question-heading > b { min-width: auto; padding: 7px 8px; }
   .home-response-grid { grid-template-columns: 1fr; }.home-answer-form { padding: 15px; }.home-submit-row { flex-wrap: wrap; }.home-answer-toolbar { align-items: flex-start; }.home-answer-toolbar > span { max-width: 130px; line-height: 1.7; }
 }
+
+/* Readable question hierarchy: short title, complete prompt, then context. */
+.home-page { font-size: 18px; }
+.home-page .archive-topline { font: 600 14px/1.6 var(--font-body, sans-serif); letter-spacing: .03em; }
+.home-header .archive-lead { font-size: 20px; line-height: 1.85; }
+.home-stats b { font-size: 32px; }.home-stats span { font-size: 16px; }
+.home-controls label { font-size: 16px; gap: 9px; }.home-controls select, .home-controls input { font-size: 17px; min-height: 46px; }.home-controls p { font-size: 16px; color: #665e50; }
+.home-question .question-eyebrow { font-size: 15px; line-height: 1.6; }.home-question .archive-question-heading > b { font-size: 16px; }
+.home-question-copy { margin-top: 20px; max-width: 960px; }
+.home-question-copy .home-prompt { margin: 0 0 18px; padding: 16px 20px; background: #f5edcf; border-left: 4px solid #bbd39b; border-radius: 12px; color: var(--ink); font-size: 23px; font-weight: 700; line-height: 1.65; }
+.home-question-copy .archive-question-intro { color: #514b40; font-size: 18px; line-height: 1.85; }.home-question-detail { margin-top: 14px; font-size: 17px; }.home-question-detail summary { color: #665e50; }.home-question-detail .archive-question-intro { margin-top: 14px; font-size: 18px; }
+.home-answer-toolbar > span { font-size: 16px; }.home-compose > summary { font-size: 17px; min-height: 44px; }
+.home-response p { font-size: 18px; line-height: 1.85; }.home-response .archive-response-meta, .home-response .archive-response-foot { font-size: 14px; line-height: 1.6; color: #665e50; }.home-text-toggle { font-size: 16px; }
+.home-page .archive-more-button { font-size: 17px; padding: 12px 20px; }.home-page .archive-empty { font-size: 17px; line-height: 1.8; }
+.home-answer-form .field-label > span, .home-answer-form .dual-fields label > span, .home-answer-form .field-question { font-size: 17px; }.home-answer-form .option-button { font-size: 17px; }.home-answer-form textarea { font-size: 18px; line-height: 1.8; }.home-submit-row > span, .home-answer-form .saved-note, .home-answer-form .validation-note { font-size: 16px; }.home-submit-row button { font-size: 17px; }
+.home-page .archive-footer { font-size: 15px; line-height: 1.7; }
+.participant-question .question-prompt { padding: 14px 16px; font-size: 22px; line-height: 1.65; }.question-detail .short-intro { font-size: 17px; line-height: 1.85; }
+@media (max-width: 640px) {
+  .home-header .archive-lead { font-size: 17px; }.home-page .archive-topline { font-size: 13px; }.home-stats b { font-size: 27px; }.home-stats span { font-size: 15px; }
+  .home-controls label, .home-controls p { font-size: 15px; }.home-question-copy .home-prompt { font-size: 20px; padding: 14px 16px; }.home-question-copy .archive-question-intro, .home-question-detail .archive-question-intro { font-size: 17px; }.home-question-detail { font-size: 16px; }
+  .home-response p { font-size: 17px; }.home-answer-toolbar > span { font-size: 14px; }.home-compose > summary { font-size: 16px; }.home-question .question-eyebrow { font-size: 13px; }
+  .participant-question .question-prompt { font-size: 20px; }.question-detail .short-intro { font-size: 16px; }
+}
+
+.host-question blockquote { margin: 0 0 22px; }.archive-question-prompt + .archive-question-intro { margin-top: 22px; }

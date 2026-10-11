@@ -747,8 +747,8 @@ function Host() {
             <div className="host-question">
               <p className="question-eyebrow">QUESTION {snapshot.question.number} / {snapshot.question.eyebrow}</p>
               <h1>{snapshot.question.title}</h1>
-              <div className="host-intro">{snapshot.question.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
               <blockquote>{snapshot.question.prompt}</blockquote>
+              <div className="host-intro">{snapshot.question.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
             </div>
 
             <section className="host-results">

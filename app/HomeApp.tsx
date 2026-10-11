@@ -88,7 +88,11 @@ export default function HomeApp() {
         const own = responses.find(response => response.questionId === question.id && response.participantId === participantId && response.sessionId === submissionSession(question.id, "open"));
         return <article className="archive-question home-question" id={`question-${question.id}`} key={question.id}>
           <div className="archive-question-heading"><div><p className="question-eyebrow">{question.number} / {question.eyebrow}</p><h2>{question.title}</h2></div><b>{ordered.length} 条</b></div>
-          <details className="home-question-detail"><summary>展开问题的详细阐述</summary><div className="archive-question-intro">{question.intro.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div><p className="home-prompt">{question.prompt}</p></details>
+          <div className="home-question-copy">
+            <p className="home-prompt">{question.prompt}</p>
+            <div className="archive-question-intro"><p>{question.intro[0]}</p></div>
+            {question.intro.length > 1 ? <details className="home-question-detail"><summary>展开更多背景说明</summary><div className="archive-question-intro">{question.intro.slice(1).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div></details> : null}
+          </div>
           <div className="home-answer-toolbar"><span>点赞最多的回答先出现</span><details className="home-compose"><summary>{own ? "修改我的回答" : "填写我的回答"} ✎</summary><HomeAnswerForm question={question} own={own} disabled={Boolean(error)} onSubmit={submit} /></details></div>
           <div className="archive-response-grid home-response-grid" aria-label={`${question.title}的回答`}>
             {displayed.map(response => <HomeResponse key={response.id} response={response} question={question} participantId={participantId} />)}
