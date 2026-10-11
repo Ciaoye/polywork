@@ -5,7 +5,7 @@
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { questions, type Question } from "../lib/questions";
-import { currentSession, publishedSnapshotUrl } from "../lib/sessions";
+import { currentSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
 import { sitePath } from "../lib/site-paths";
 
 type Mode = "landing" | "participant" | "host";
@@ -32,6 +32,7 @@ type Snapshot = {
   allResponses?: EventResponse[];
   historyResponses?: EventResponse[];
   loaded?: boolean;
+  sessionState?: { sessionId: string; revealedQuestionIds: string[]; syncVersion: string; updatedAt: string };
 };
 type EventMode = "static" | "live";
 type ExportRow = {
@@ -161,6 +162,15 @@ async function sendAction(payload: Record<string, unknown>) {
   return normalizeSnapshot(data);
 }
 
+type PendingVote = { responseId: string; value: boolean };
+function voteKey(participantId: string) { return `polywork-votes:${currentSession()}:${participantId}`; }
+function pendingVotes(participantId: string): PendingVote[] {
+  if (typeof window === "undefined" || participantId === "host") return [];
+  try { return JSON.parse(localStorage.getItem(voteKey(participantId)) || "[]"); } catch { return []; }
+}
+function savePendingVotes(participantId: string, votes: PendingVote[]) {
+  localStorage.setItem(voteKey(participantId), JSON.stringify(votes));
+}
 function useSnapshot(participantId: string, endpoint = "/api/event", questionIndex?: number, mode: EventMode = "live") {
   const [source, setSource] = useState<Snapshot>(emptySnapshot);
   const [historical, setHistorical] = useState<EventResponse[]>([]);
@@ -174,33 +184,23 @@ function useSnapshot(participantId: string, endpoint = "/api/event", questionInd
       if (!archived.ok) throw new Error("历史数据文件暂时无法读取");
       const text = await archived.text();
       const history = questions.flatMap((_, index) => staticSnapshot(text, participantId, index).responses);
+      if (requestGeneration === generation.current) setHistorical(history);
       let next: Snapshot;
-      if (mode === "static") {
-        next = { ...staticSnapshot(text, participantId), allResponses: history };
-      } else {
+      if (mode === "static") next = { ...staticSnapshot(text, participantId), allResponses: history };
+      else {
         const params = new URLSearchParams({ participant: participantId, session: currentSession(), all: "1", question: "0" });
         const response = await fetch(`${endpoint}?${params}`, { cache: "no-store" });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "暂时无法连接现场");
         next = normalizeSnapshot(data);
-        next.state.revealAnswers = true;
-        if (!next.allResponses) throw new Error("活动接口需要更新；历史回答仍可查看");
+        if (!next.allResponses) throw new Error("活动接口需要更新；现场数据尚未确认");
       }
       if (requestGeneration !== generation.current) return undefined;
-      setHistorical(history);
-      setSource(next);
-      setError("");
-      setReady(true);
+      setSource(next); setError(""); setReady(true);
       return next;
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "暂时无法连接现场");
-      // Keep known historical answers visible, without claiming a failed live read is zero.
-      const response = await fetch(staticDataEndpoint(), { cache: "force-cache" });
-      if (response.ok && requestGeneration === generation.current) {
-        const text = await response.text();
-        setHistorical(questions.flatMap((_, index) => staticSnapshot(text, participantId, index).responses));
-        setReady(true);
-      }
+      setReady(true);
       return undefined;
     }
   }, [endpoint, mode, participantId]);
@@ -210,30 +210,63 @@ function useSnapshot(participantId: string, endpoint = "/api/event", questionInd
   }, [refresh]);
   useEffect(() => {
     if (mode !== "live" || participantId === "host") return;
-    // Poll only a static GitHub file. Never poll the Tencent API.
-    let active = true;
-    let version = "";
+    let active = true, checking = false, version = "";
     const check = async () => {
+      if (checking) return;
+      checking = true;
       try {
-        const response = await fetch(`${publishedSnapshotUrl}?v=${Date.now()}`, { cache: "no-store" });
+        const signalResponse = await fetch(`${publishedSignalUrl}?v=${Date.now()}`, { cache: "no-store" });
+        if (!signalResponse.ok) return;
+        const signal = await signalResponse.json();
+        if (!active || !signal.publishedAt || signal.publishedAt === version) return;
+        const response = await fetch(`${publishedSnapshotUrl}?v=${encodeURIComponent(signal.publishedAt)}`, { cache: "no-store" });
         if (!response.ok) return;
         const data = await response.json();
-        if (!active || !data.publishedAt || data.publishedAt === version) return;
+        if (!active || data.publishedAt !== signal.publishedAt) return;
         version = data.publishedAt;
-        setSource((previous) => ({ ...previous, allResponses: mergeResponses((data.allResponses || []).map((item: EventResponse) => ({ ...item, reacted: false })), previous.allResponses || []) }));
-      } catch { /* A static refresh failure leaves the current answers intact. */ }
+        setSource((previous) => {
+          const ownReactions = new Map((previous.allResponses || []).map((item) => [item.id, item.reacted]));
+          const nextState = data.sessionState;
+          return { ...previous,
+            sessionState: nextState?.sessionId === currentSession() && nextState.updatedAt >= (previous.sessionState?.updatedAt || "") ? nextState : previous.sessionState,
+            allResponses: mergeResponses((data.allResponses || []).map((item: EventResponse) => ({ ...item, reacted: ownReactions.get(item.id) || false })), previous.allResponses || []) };
+        });
+        if (currentSession() === "open") return;
+        const token = data.sessionState?.syncVersion;
+        const tokenKey = `${voteKey(participantId)}:last-sync`;
+        if (!token || token === localStorage.getItem(tokenKey)) return;
+        localStorage.setItem(tokenKey, token);
+        const queued = pendingVotes(participantId).slice(0, 100);
+        if (!queued.length) return;
+        // This POST occurs only for a new explicit host refresh command.
+        // Vote clicks themselves never invoke Tencent, and failures stay queued.
+        try {
+          const next = await sendAction({ action: "syncVotes", participantId, syncVersion: token, votes: queued });
+          const sent = new Map(queued.map((vote) => [vote.responseId, vote.value]));
+          savePendingVotes(participantId, pendingVotes(participantId).filter((vote) => !sent.has(vote.responseId) || sent.get(vote.responseId) !== vote.value));
+          if (active) setSource(next);
+        } catch { /* Retry the retained votes on the next host refresh, never by polling Tencent. */ }
+      } catch { /* Static refresh failures leave the current view intact. */ }
+      finally { checking = false; }
     };
-    const timer = window.setInterval(() => { if (document.visibilityState === "visible") void check(); }, 30000);
+    // GitHub static polling is separate from Tencent API invocation.
+    const timer = window.setInterval(() => void check(), 5000);
+    const visible = () => { if (document.visibilityState === "visible") void check(); };
+    document.addEventListener("visibilitychange", visible);
     void check();
-    return () => { active = false; window.clearInterval(timer); };
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, [mode, participantId]);
   const index = questionIndex ?? source.questionIndex;
-  const all = mode === "static" ? historical : mergeResponses(source.allResponses || source.responses, historical);
-  const snapshot = { ...source, questionIndex: index, question: questions[index], totalQuestions: questions.length,
-    historyResponses: historical,
-    loaded: ready,
-    responses: all.filter((response) => response.questionId === questions[index].id) };
-  return { snapshot, setSnapshot: setSource, error, ready, refresh };
+  const queued = new Map(pendingVotes(participantId).map((vote) => [vote.responseId, vote.value]));
+  const all = (mode === "static" ? historical : mergeResponses(source.allResponses || source.responses, historical)).map((response) => {
+    if (!queued.has(response.id)) return response;
+    const value = queued.get(response.id)!;
+    return { ...response, reacted: value, reactionCount: Math.max(0, response.reactionCount + (value === response.reacted ? 0 : value ? 1 : -1)) };
+  });
+  const revealAnswers = currentSession() === "open" || Boolean(source.sessionState?.revealedQuestionIds.includes(questions[index].id));
+  const snapshot = { ...source, state: { ...source.state, revealAnswers }, questionIndex: index, question: questions[index], totalQuestions: questions.length,
+    historyResponses: historical, loaded: ready, responses: all.filter((response) => response.questionId === questions[index].id) };
+  return { snapshot, setSnapshot: setSource, error, ready, refresh, clearError: () => setError("") };
 }
 
 function mergeResponses(primary: EventResponse[], secondary: EventResponse[]) {
@@ -245,14 +278,15 @@ function mergeResponses(primary: EventResponse[], secondary: EventResponse[]) {
   return [...merged.values()];
 }
 
-function HistoryAnswers({ snapshot }: { snapshot: Snapshot }) {
-  const history = (snapshot.historyResponses || []).filter((response) => response.questionId === snapshot.question.id && !response.hidden);
+function HistoryAnswers({ snapshot, participantId = "archive", onAction, host = false }: { snapshot: Snapshot; participantId?: string; host?: boolean; onAction?: (payload: Record<string, unknown>) => Promise<void> }) {
+  const liveById = new Map(snapshot.responses.map((response) => [response.id, response]));
+  const history = (snapshot.historyResponses || []).filter((response) => response.questionId === snapshot.question.id && !response.hidden).map((response) => ({ ...response, reactionCount: liveById.get(response.id)?.reactionCount ?? response.reactionCount, reacted: liveById.get(response.id)?.reacted ?? false, highlighted: liveById.get(response.id)?.highlighted ?? response.highlighted, hidden: liveById.get(response.id)?.hidden ?? response.hidden })).filter((response) => host || !response.hidden);
   const frozenIds = new Set(history.map((response) => response.id));
   const otherSessions = snapshot.responses.filter((response) => response.sessionId !== currentSession() && !response.hidden && !frozenIds.has(response.id));
   return <details className="history-answers"><summary>展开历史回答 · {snapshot.loaded ? `${history.length + otherSessions.length} 条` : "读取中"}</summary>
     <p className="history-note">活动开始前保存的回答；各场次分开保留。</p>
-    <div className="response-grid">{history.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId="archive" readOnly onAction={async () => {}} />)}</div>
-    {otherSessions.length ? <><h3>其他场次新增</h3><div className="response-grid">{otherSessions.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId="archive" readOnly onAction={async () => {}} />)}</div></> : null}
+    <div className="response-grid">{history.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId={participantId} host={host} readOnly={!onAction} onAction={onAction || (async () => {})} />)}</div>
+    {otherSessions.length ? <><h3>其他场次新增</h3><div className="response-grid">{otherSessions.map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId={participantId} host={host} readOnly={!onAction} onAction={onAction || (async () => {})} />)}</div></> : null}
   </details>;
 }
 
@@ -473,7 +507,13 @@ function Participant() {
   }, [snapshot.question, own]);
 
   const act = async (payload: Record<string, unknown>) => {
-    setSnapshot(await sendAction({ ...payload, viewQuestionIndex: snapshot.questionIndex }));
+    if (payload.action !== "react" || !snapshot.state.revealAnswers) return;
+    const response = snapshot.responses.find((item) => item.id === payload.responseId);
+    if (!response) return;
+    const votes = pendingVotes(participantId).filter((vote) => vote.responseId !== response.id);
+    votes.push({ responseId: response.id, value: !response.reacted });
+    savePendingVotes(participantId, votes);
+    setSnapshot((previous) => ({ ...previous }));
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -515,7 +555,7 @@ function Participant() {
               <b>你可以自由选择回答哪一题</b>
               <span>主持人切题不会打断你正在写的内容</span>
             </div>
-            <div className="participant-question-picker">
+            <div className={`participant-question-picker ${currentSession() === "open" ? "home-question-picker" : ""}`}>
               {questions.map((question, index) => (
                 <button
                   className={index === snapshot.questionIndex ? "active" : ""}
@@ -523,7 +563,7 @@ function Participant() {
                   type="button"
                   onClick={() => setSelectedQuestion(index)}
                   aria-label={`查看第 ${index + 1} 题：${question.title}`}
-                >{index + 1}</button>
+                >{currentSession() === "open" ? <><span>{question.number}</span><span>{question.title}</span></> : index + 1}</button>
               ))}
             </div>
           </nav>
@@ -531,7 +571,7 @@ function Participant() {
             <p className="question-eyebrow">{snapshot.question.number} / {snapshot.question.eyebrow}</p>
             <h1>{snapshot.question.title}</h1>
             <p className="question-prompt">{snapshot.question.prompt}</p>
-            <p className="short-intro">{snapshot.question.intro[0]}</p>
+            <div className="question-detail">{snapshot.question.intro.map((paragraph) => <p className="short-intro" key={paragraph}>{paragraph}</p>)}</div>
           </section>
           <form className="answer-form win-outset" onSubmit={submit}>
             <div className="title-bar small"><strong>{mode === "static" ? "历史数据只读" : saved ? "修改我的回答" : "写下我的回答"}</strong><span>{mode === "static" ? "活动已结束" : "匿名提交 · 至少 15 个字"}</span></div>
@@ -540,18 +580,18 @@ function Participant() {
                 <QuestionFields question={snapshot.question} form={form} setForm={setForm} />
                 <button className="os-button primary submit-button" disabled={saving || mode === "static" || Boolean(error)}>{mode === "static" ? "活动已结束" : saving ? "正在放到大屏幕……" : saved ? "保存修改" : "匿名提交"}</button>
               </fieldset>
-              {mode === "static" ? <p className="saved-note static-note">这是活动结束后的历史档案，当前不接受新回答。</p> : saved ? <p className="saved-note">✓ 已经出现在现场。你可以继续修改。</p> : null}
+              {mode === "static" ? <p className="saved-note static-note">这是活动结束后的历史档案，当前不接受新回答。</p> : saved ? <p className="saved-note">{snapshot.state.revealAnswers ? "✓ 已保存。你可以继续修改。" : "✓ 已保存，等待主持人揭晓。你可以继续修改。"}</p> : null}
               {validationError ? <p className="saved-note validation-note">{validationError}</p> : null}
             </div>
           </form>
           <section className="others-section">
-            <div className="section-heading"><div><span>COLLECTIVE RESPONSES</span><h2>{currentSession() === "open" ? "大家正在怎么想" : "本场大家正在怎么想"}</h2></div><b>{error && currentSession() !== "open" ? "未确认" : displayedResponses.filter((response) => !response.hidden).length}</b></div>
-            {!snapshot.state.revealAnswers ? <div className="answers-closed win-inset">主持人暂时收起了回答。<br />先留一点安静思考的时间。</div> :
+            <div className="section-heading"><div><span>COLLECTIVE RESPONSES</span><h2>{currentSession() === "open" ? "大家正在怎么想" : "本场大家正在怎么想"}</h2></div><b>{!snapshot.state.revealAnswers ? "待揭晓" : error && currentSession() !== "open" ? "未确认" : displayedResponses.filter((response) => !response.hidden).length}</b></div>
+            {!snapshot.state.revealAnswers ? <div className="answers-closed win-inset">回答尚未揭晓，包括你自己的回答。<br />等大家填写完成，由主持人统一揭晓。</div> :
               <div className="response-grid participant-grid">
-                {displayedResponses.filter((response) => !response.hidden).map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId={participantId} readOnly onAction={act} />)}
+                {displayedResponses.filter((response) => !response.hidden).map((response) => <ResponseCard key={response.id} response={response} question={snapshot.question} participantId={participantId} readOnly={mode === "static" || currentSession() === "open"} onAction={act} />)}
                 {!displayedResponses.some((response) => !response.hidden) ? <p className="empty-copy">这里还是空的。也许你会写下第一句。</p> : null}
               </div>}
-          {currentSession() !== "open" ? <HistoryAnswers snapshot={snapshot} /> : null}
+          {currentSession() !== "open" && snapshot.state.revealAnswers ? <><p className="history-note">点赞先暂存在这台设备，主持人刷新时批量同步。当前暂存 {pendingVotes(participantId).length} 条。</p><HistoryAnswers snapshot={snapshot} participantId={participantId} onAction={act} /></> : null}
           </section>
           <div className="participant-step-nav">
             <button className="os-button" type="button" disabled={snapshot.questionIndex === 0} onClick={() => setSelectedQuestion(snapshot.questionIndex - 1)}>← 上一题</button>
@@ -603,7 +643,7 @@ function QuestionFields({ question, form, setForm }: { question: Question; form:
 function Host() {
   const [mode] = useState<EventMode>(() => eventMode("host"));
   const [hostQuestionIndex, setHostQuestionIndex] = useState<number | undefined>(undefined);
-  const { snapshot, setSnapshot, error, ready, refresh } = useSnapshot("host", "/api/host-action", hostQuestionIndex, mode);
+  const { snapshot, setSnapshot, error, ready, clearError } = useSnapshot("host", "/api/host-action", hostQuestionIndex, mode);
   const [showHome, setShowHome] = useState(true);
   const [qr, setQr] = useState("");
   const [joinUrl, setJoinUrl] = useState(() => `https://ciaoye.github.io/polywork/${currentSession() === "open" ? "" : "1012/"}`);
@@ -623,26 +663,31 @@ function Host() {
     if (!joinUrl) return;
     void QRCode.toDataURL(joinUrl, { width: 260, margin: 1, color: { dark: "#271744", light: "#ffffff" } }).then(setQr);
   }, [joinUrl]);
+  const hostAction = async (payload: Record<string, unknown>) => {
+    const response = await fetch("/api/host-action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...payload, sessionId: currentSession(), viewQuestionIndex: snapshot.questionIndex, all: true }) });
+    const next = await response.json();
+    if (!response.ok) throw new Error(next.error || "主持操作失败");
+    setSnapshot(normalizeSnapshot(next));
+    clearError();
+    return next;
+  };
   const act = async (payload: Record<string, unknown>) => {
-    if (payload.action === "setReveal") setSnapshot({ ...snapshot, state: { ...snapshot.state, revealAnswers: Boolean(payload.value) } });
-    if (payload.action === "moderate") {
-      const allResponses = (snapshot.allResponses || snapshot.responses).map((response) => response.id === payload.responseId ? { ...response, [String(payload.field)]: payload.value } : response);
-      setSnapshot({ ...snapshot, allResponses });
-    }
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await hostAction(payload.action === "setReveal" ? { action: "setSessionReveal", questionId: snapshot.question.id, value: payload.value } : payload);
+      setHostError("已同步主持操作到参与端。");
+    } catch (nextError) { setHostError(nextError instanceof Error ? nextError.message : "主持操作失败"); }
+    finally { setRefreshing(false); }
   };
   const refreshEveryone = async () => {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const next = await refresh();
-      if (!next) return;
-      const response = await fetch("/api/publish", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ allResponses: next.allResponses }) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "静态快照发布失败");
-      setHostError("已刷新并发布；参与端稍后自动读取静态快照。");
-    } catch (nextError) {
-      setHostError(`主持端已刷新，参与端同步失败：${nextError instanceof Error ? nextError.message : "请用 npm run host 启动"}`);
-    } finally { setRefreshing(false); }
+      const next = await hostAction({ action: "requestSync" });
+      setHostError(next.syncNotice || "已刷新并收集参与端暂存的投票。");
+    } catch (nextError) { setHostError(nextError instanceof Error ? nextError.message : "刷新失败，投票仍保留在参与者设备。"); }
+    finally { setRefreshing(false); }
   };
   const goToQuestion = async (index: number) => {
     setShowHome(false);
@@ -703,7 +748,7 @@ function Host() {
             </div>
 
             <section className="host-results">
-              <div className="section-heading host-heading"><div><span>COLLECTIVE RESPONSES</span><h2>{snapshot.state.revealAnswers ? "大家的回答正在长出来" : "先各自想一想"}</h2></div><b>{error || !ready ? "未确认" : `${visibleResponses.length} 条`}</b></div>
+              <div className="section-heading host-heading"><div><span>COLLECTIVE RESPONSES</span><h2>{snapshot.state.revealAnswers ? "大家的回答正在长出来" : "等待大家回答，主持人再揭晓"}</h2></div><b>{error || !ready ? "未确认" : `${visibleResponses.length} 条`}</b></div>
               {!snapshot.state.revealAnswers ? <div className="answers-closed large win-inset">回答暂时藏起来了。<br /><small>主持人可以在大家提交后一起揭晓。</small></div> : <>
                 {snapshot.question.type === "spectrum" ? <SpectrumSummary responses={visibleResponses} /> : null}
                 {snapshot.question.type === "poll" || snapshot.question.type === "value" ? <PollSummary question={snapshot.question} responses={visibleResponses} /> : null}
@@ -714,7 +759,7 @@ function Host() {
                   {!visibleResponses.length ? <div className="empty-stage">{error || !ready ? "现场数据尚未确认" : "等待第一条回答"}<span className="blink-cursor">▮</span></div> : null}
                 </div>
               </>}
-              {currentSession() !== "open" ? <HistoryAnswers snapshot={snapshot} /> : null}
+              {currentSession() !== "open" && snapshot.state.revealAnswers ? <HistoryAnswers snapshot={snapshot} participantId="host" host onAction={act} /> : null}
             </section>
           </>}
         </section>
@@ -738,7 +783,7 @@ function Host() {
                 <button className="os-button" disabled={showHome} onClick={() => void goPrevious()}>← {snapshot.questionIndex === 0 ? "回首页" : "上一题"}</button>
                 <button className="os-button primary" disabled={!showHome && snapshot.questionIndex === snapshot.totalQuestions - 1} onClick={() => void goNext()}>{showHome ? "开始 →" : "下一题 →"}</button>
               </div>
-              {!showHome && mode === "live" ? <button className="os-button wide-button" onClick={() => act({ action: "setReveal", value: !snapshot.state.revealAnswers })}>{snapshot.state.revealAnswers ? "◉ 暂时收起所有回答" : "◎ 展示所有回答"}</button> : null}
+              {!showHome && mode === "live" ? <button className="os-button wide-button" disabled={refreshing || !ready} onClick={() => act({ action: "setReveal", value: !snapshot.state.revealAnswers })}>{snapshot.state.revealAnswers ? "◉ 暂时收起所有回答" : "◎ 揭晓本题全部回答"}</button> : null}
               {hostError ? <p className="host-error">{hostError}</p> : null}
               <div className="control-divider" />
               <details className="discussion-prompts" open>

@@ -98,8 +98,14 @@ async function getState() {
   return { _id: "state", ...initial };
 }
 
-async function snapshot(participantId, requestedQuestion, all = false) {
+async function getSessionState(sessionId) {
+  const saved = first(await collection.doc(`session:${sessionId}`).get());
+  return { sessionId, revealedQuestionIds: saved?.revealedQuestionIds || [], everRevealedQuestionIds: saved?.everRevealedQuestionIds || saved?.revealedQuestionIds || [], syncVersion: saved?.syncVersion || "", updatedAt: saved?.updatedAt || "" };
+}
+
+async function snapshot(participantId, requestedQuestion, all = false, sessionId = "open") {
   const state = await getState();
+  const sessionState = await getSessionState(sessionId);
   const questionIndex = boundedQuestion(requestedQuestion, boundedQuestion(state.activeQuestion));
   const questionId = questionIds[questionIndex];
   const [responseResult, reactionResult] = await Promise.all([
@@ -111,7 +117,7 @@ async function snapshot(participantId, requestedQuestion, all = false) {
   const reacted = new Set();
   for (const reaction of reactions) {
     reactionCount.set(reaction.responseId, (reactionCount.get(reaction.responseId) || 0) + 1);
-    if (participantId && reaction.participantId === participantId) reacted.add(reaction.responseId);
+    if (participantId && reaction.participantId === participantId && (reaction.sessionId || "legacy") === sessionId) reacted.add(reaction.responseId);
   }
   const responses = rows(responseResult)
     .sort((left, right) => String(left.createdAt).localeCompare(String(right.createdAt)))
@@ -133,6 +139,7 @@ async function snapshot(participantId, requestedQuestion, all = false) {
       revealAnswers: state.revealAnswers !== false,
       updatedAt: state.updatedAt,
     },
+    sessionState,
     questionIndex,
     totalQuestions: questionIds.length,
     responses: responses.filter((response) => response.questionId === questionId),
@@ -153,6 +160,7 @@ function assertHost(payload) {
 async function act(payload) {
   const now = new Date().toISOString();
   const viewQuestion = boundedQuestion(payload.viewQuestionIndex);
+  const eventSession = String(payload.sessionId || "open");
 
   if (payload.action === "submit") {
     const participantId = String(payload.participantId || "").slice(0, 100);
@@ -178,23 +186,38 @@ async function act(payload) {
       createdAt: existing?.createdAt || now,
       updatedAt: now,
     });
-    return reply(200, await snapshot(participantId, viewQuestion, Boolean(payload.all)));
+    return reply(200, await snapshot(participantId, viewQuestion, Boolean(payload.all), eventSession));
   }
 
-  if (payload.action === "react") {
+  if (payload.action === "syncVotes") {
     const participantId = String(payload.participantId || "").slice(0, 100);
-    const responseId = String(payload.responseId || "").slice(0, 100);
-    if (!participantId || !responseId) return reply(400, { error: "互动信息不完整" });
-    const response = first(await collection.doc(responseId).get());
-    if (!response || response.kind !== "response") return reply(404, { error: "这条回答不存在" });
-    const reactionId = stableId("reaction", responseId, participantId);
-    const existing = first(await collection.doc(reactionId).get());
-    if (existing) {
-      await collection.doc(reactionId).remove();
-    } else {
-      await collection.doc(reactionId).set({ kind: "reaction", responseId, questionId: response.questionId, participantId, createdAt: now });
+    const state = await getSessionState(eventSession);
+    if (eventSession !== "2026-10-12" || !participantId || !state.syncVersion || payload.syncVersion !== state.syncVersion || !Array.isArray(payload.votes) || payload.votes.length > 100) {
+      return reply(400, { error: "请等待主持人下一次刷新，再同步暂存的投票" });
     }
-    return reply(200, await snapshot(participantId, viewQuestion, Boolean(payload.all)));
+    for (const vote of payload.votes) {
+      const responseId = String(vote.responseId || "").slice(0, 100);
+      const response = first(await collection.doc(responseId).get());
+      if (!response || response.kind !== "response" || !state.everRevealedQuestionIds.includes(response.questionId) || typeof vote.value !== "boolean") continue;
+      const reactionId = stableId("reaction", eventSession, responseId, participantId);
+      if (vote.value) await collection.doc(reactionId).set({ kind: "reaction", responseId, questionId: response.questionId, participantId, sessionId: eventSession, createdAt: now });
+      else if (first(await collection.doc(reactionId).get())) await collection.doc(reactionId).remove();
+    }
+    return reply(200, await snapshot(participantId, viewQuestion, true, eventSession));
+  }
+
+  if (payload.action === "requestSync" || payload.action === "setSessionReveal") {
+    assertHost(payload);
+    if (eventSession !== "2026-10-12") return reply(400, { error: "场次不存在" });
+    const state = await getSessionState(eventSession);
+    const revealed = new Set(state.revealedQuestionIds);
+    if (payload.action === "setSessionReveal") {
+      if (!questionIds.includes(payload.questionId)) return reply(400, { error: "题目不存在" });
+      if (payload.value) revealed.add(payload.questionId);
+      else revealed.delete(payload.questionId);
+    }
+    await collection.doc(`session:${eventSession}`).set({ kind: "session", sessionId: eventSession, revealedQuestionIds: [...revealed], everRevealedQuestionIds: [...new Set([...state.everRevealedQuestionIds, ...revealed])], syncVersion: payload.action === "requestSync" ? crypto.randomUUID() : state.syncVersion, updatedAt: now });
+    return reply(200, await snapshot("host", viewQuestion, true, eventSession));
   }
 
   if (payload.action === "setQuestion") {
@@ -231,7 +254,7 @@ async function act(payload) {
     else if (payload.field === "highlighted") patch.highlighted = Boolean(payload.value);
     else return reply(400, { error: "不支持的主持操作" });
     await collection.doc(responseId).update(patch);
-    return reply(200, await snapshot("host", viewQuestion));
+    return reply(200, await snapshot("host", viewQuestion, true, eventSession));
   }
 
   return reply(400, { error: "不支持的操作" });
@@ -243,7 +266,7 @@ exports.main = async (event) => {
   try {
     if (method === "GET") {
       const query = event.queryStringParameters || {};
-      return reply(200, await snapshot(String(query.participant || ""), query.question, query.all === "1"), headers);
+      return reply(200, await snapshot(String(query.participant || ""), query.question, query.all === "1", String(query.session || "open")), headers);
     }
     if (method === "POST") return await act(parseBody(event));
     return reply(405, { error: "不支持的请求方式" });

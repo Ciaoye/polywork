@@ -15,7 +15,7 @@ async function harness() {
     },
   };
   const require = createRequire(import.meta.url);
-  const context = { exports: {}, process: { env: {} }, Buffer, console, require: (name) => name === "@cloudbase/node-sdk" ? { init: () => ({ database: () => ({ collection: () => collection }) }) } : require(name) };
+  const context = { exports: {}, process: { env: { HOST_KEY: "test-host-key" } }, Buffer, console, require: (name) => name === "@cloudbase/node-sdk" ? { init: () => ({ database: () => ({ collection: () => collection }) }) } : require(name) };
   vm.runInNewContext(await readFile(new URL("../cloudbase-functions/polywork-event-api/index.js", import.meta.url), "utf8"), context);
   return { main: context.exports.main, data };
 }
@@ -37,4 +37,45 @@ test("same participant has independent answers per session and edits only that s
   assert.equal(own.find((row) => row._id === "old-0").data.text, "历史回答");
   assert.match(own.find((row) => row.sessionId === "2026-10-12").data.text, /更新后/);
   assert.equal((await submit("unknown", "这是足够长的回答但是这个场次并不存在应该拒绝")).statusCode, 400);
+});
+
+test("event answers stay closed until that specific question is revealed", async () => {
+  const { main } = await harness();
+  const get = async () => JSON.parse((await main({ httpMethod: "GET", queryStringParameters: { all: "1", session: "2026-10-12" } })).body);
+  assert.deepEqual((await get()).sessionState.revealedQuestionIds, []);
+  const reveal = (hostKey, value) => main({ httpMethod: "POST", body: { action: "setSessionReveal", sessionId: "2026-10-12", questionId: "self-introduction", value, hostKey } });
+  assert.equal((await reveal("wrong", true)).statusCode, 401);
+  assert.equal((await reveal("test-host-key", true)).statusCode, 200);
+  const state = (await get()).sessionState;
+  assert.deepEqual(state.revealedQuestionIds, ["self-introduction"]);
+  assert.equal(state.revealedQuestionIds.includes("income-map"), false);
+  await reveal("test-host-key", false);
+  assert.deepEqual((await get()).sessionState.revealedQuestionIds, []);
+});
+test("queued votes require host refresh and repeated batches are idempotent", async () => {
+  const { main } = await harness();
+  const post = (body) => main({ httpMethod: "POST", body: { ...body, sessionId: "2026-10-12", all: true } });
+  const vote = (syncVersion, value) => post({ action: "syncVotes", participantId: "voter", syncVersion, votes: [{ responseId: "old-0", value }] });
+  assert.equal((await vote("invalid", true)).statusCode, 400);
+  await post({ action: "setSessionReveal", hostKey: "test-host-key", questionId: "self-introduction", value: true });
+  const refresh = JSON.parse((await post({ action: "requestSync", hostKey: "test-host-key" })).body);
+  const token = refresh.sessionState.syncVersion;
+  assert.ok(token);
+  await post({ action: "setSessionReveal", hostKey: "test-host-key", questionId: "self-introduction", value: false });
+  const first = JSON.parse((await vote(token, true)).body);
+  assert.equal(first.allResponses.find((row) => row.id === "old-0").reactionCount, 1);
+  const duplicate = JSON.parse((await vote(token, true)).body);
+  assert.equal(duplicate.allResponses.find((row) => row.id === "old-0").reactionCount, 1);
+  const cancelled = JSON.parse((await vote(token, false)).body);
+  assert.equal(cancelled.allResponses.find((row) => row.id === "old-0").reactionCount, 0);
+});
+
+test("host highlighting persists without changing answer text", async () => {
+  const { main, data } = await harness();
+  for (const value of [true, false]) {
+    const result = await main({ httpMethod: "POST", body: { action: "moderate", hostKey: "test-host-key", sessionId: "2026-10-12", responseId: "old-0", field: "highlighted", value, all: true } });
+    assert.equal(result.statusCode, 200);
+    assert.equal(JSON.parse(result.body).allResponses.find((response) => response.id === "old-0").highlighted, value);
+    assert.equal(data.get("old-0").data.text, "历史回答");
+  }
 });

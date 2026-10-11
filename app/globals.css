@@ -216,3 +216,10 @@ textarea:focus { border-color: #29261f; }
 .connection-error { padding: 12px 18px; background: #fbe5d9; margin: 0; }
 .hero-content, .archive-summary { background: #fff9ed; }.hero-window { border-radius: 24px; }.taskbar { background: #f2e7cb; }
 @media (max-width: 640px) { .participant-question h1 { font-size: 32px; }.host-sidebar { padding: 10px; }.host-stage { padding: 24px 16px; } }
+
+.home-question-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.home-question-picker button { display: flex; align-items: center; gap: 10px; min-height: 65px; padding: 12px; text-align: left; font-size: 12px; line-height: 1.6; }
+.home-question-picker button span:first-child { font-weight: 800; font-size: 16px; }
+.question-detail { display: grid; gap: 12px; margin-top: 18px; }
+.question-detail .short-intro { margin: 0; font-size: 14px; line-height: 1.9; }
+@media (max-width: 640px) { .home-question-picker { grid-template-columns: 1fr; } }

@@ -6,3 +6,5 @@ export function currentSession() {
   return /\/1012\/?$/.test(window.location.pathname) ? SESSION_1012 : "open";
 }
 export const publishedSnapshotUrl = "https://raw.githubusercontent.com/Ciaoye/polywork/live-data/snapshot.json";
+
+export const publishedSignalUrl = "https://raw.githubusercontent.com/Ciaoye/polywork/live-data/signal.json";

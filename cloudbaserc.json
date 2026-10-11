@@ -12,7 +12,7 @@
       "memorySize": 256,
       "description": "多元工作与收入探索活动接口",
       "envVariables": {
-        "PARTICIPANT_JOIN_URL": "https://agent2026-d5goi0noda51a261b-1446728973.tcloudbaseapp.com/polywork/"
+        "PARTICIPANT_JOIN_URL": "https://ciaoye.github.io/polywork/"
       }
     }
   ]

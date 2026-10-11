@@ -16,7 +16,7 @@ function App() {
   const pathname = window.location.pathname.replace(/\/$/, "");
   const route = pathname.startsWith(base) ? pathname.slice(base.length) : pathname;
   if (route === "/archive") return <ArchiveApp />;
-  if (route === "/host" || route === "/host/1012" || pathname === "/host/1012" || pathname === "/host") return <EventApp mode="host" />;
+  if (route === "/host" || route === "/host/1012" || pathname === "/host/1012" || pathname === "/host") return ["localhost", "127.0.0.1"].includes(window.location.hostname) ? <EventApp mode="host" /> : <main className="desktop"><p className="connection-error">主持端只在本机开放，请打开 http://localhost:3000/host/1012/ 。</p></main>;
   if (route === "/join" || route === "/1012") return <EventApp mode="participant" />;
   if (route === "" && window.__POLYWORK_DEFAULT_PARTICIPANT_MODE__ === "live") return <EventApp mode="participant" />;
   return <EventApp mode="landing" />;
