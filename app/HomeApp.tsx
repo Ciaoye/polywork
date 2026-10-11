@@ -25,7 +25,6 @@ function HomeAnswerForm({ question, own, disabled, onSubmit }: {
     finally { setSaving(false); }
   };
   return <form className="home-answer-form" onSubmit={submit}>
-    {submissionSession(question.id, "open") !== "open" ? <p className="home-enrollment-note">这题的回答也会加入 10.12 本场讨论；在这里和现场可以继续修改同一份回答。</p> : null}
     <fieldset disabled={disabled || saving} className="static-fieldset">
       <QuestionFields question={question} form={form} setForm={setForm} />
       <div className="home-submit-row"><span>匿名提交 · 至少 15 个字</span><button className="os-button primary" type="submit">{saving ? "正在保存……" : own ? "保存修改" : "提交回答"}</button></div>
