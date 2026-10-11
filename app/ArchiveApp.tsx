@@ -123,7 +123,7 @@ export default function ArchiveApp() {
         <div className="archive-topline"><a href={sitePath("/")}>← 回到活动首页</a><span>POLYWORK · INCOME · LIFE / ARCHIVE</span></div>
         <p className="question-eyebrow">历史回答 · 现场回看</p>
         <h1>大家是怎么活着的？</h1>
-        <p className="archive-lead">这里保存了活动现场留下的回答。它们按照十个问题重新排在一起，方便回看每个人的具体经验，也方便从重复出现的词语、差异和停顿里，继续理解这场讨论。</p>
+        <p className="archive-lead">这里保存了活动现场留下的回答。它们按照十二个问题重新排在一起，方便回看每个人的具体经验，也方便从重复出现的词语、差异和停顿里，继续理解这场讨论。</p>
         <div className="archive-stats">
           <div><b>{responses.length}</b><span>条回答</span></div>
           <div><b>{participants}</b><span>位参与者</span></div>
@@ -145,7 +145,7 @@ export default function ArchiveApp() {
       <section className="archive-controls" aria-label="筛选历史回答">
         <label>查看问题
           <select value={selected} onChange={(event) => setSelected(event.target.value)}>
-            <option value="all">全部十个问题</option>
+            <option value="all">全部十二个问题</option>
             {questions.map((question) => <option key={question.id} value={question.id}>{question.number} {question.title}</option>)}
           </select>
         </label>
@@ -195,7 +195,7 @@ export default function ArchiveApp() {
           </article>;
         })}
       </section>
-      <footer className="archive-footer"><a href={sitePath("/join")}>回到参与者入口</a><span>按十个问题整理的现场回答、背景文字与讨论线索。</span></footer>
+      <footer className="archive-footer"><a href={sitePath("/join")}>回到参与者入口</a><span>按十二个问题整理的现场回答、背景文字与讨论线索。</span></footer>
     </main>
   );
 }

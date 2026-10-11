@@ -5,18 +5,9 @@ const cloudbase = require("@cloudbase/node-sdk");
 const app = cloudbase.init({ env: cloudbase.SYMBOL_DEFAULT_ENV });
 const db = app.database();
 const collection = db.collection("polywork_events");
-const questionIds = [
-  "self-introduction",
-  "income-map",
-  "choice-spectrum",
-  "earning-story",
-  "body-memory",
-  "one-year-buffer",
-  "solo-company",
-  "valuable-thing",
-  "enough",
-  "new-default",
-];
+const sessionQuestionIds = require("./session-questions.json");
+const questionIds = sessionQuestionIds.open;
+function idsForSession(sessionId) { return sessionQuestionIds[sessionId] || questionIds; }
 const MIN_ANSWER_LENGTH = 15;
 
 const headers = {
@@ -46,9 +37,9 @@ function stableId(...parts) {
   return crypto.createHash("sha256").update(parts.join(":"), "utf8").digest("hex").slice(0, 32);
 }
 
-function boundedQuestion(value, fallback = 0) {
+function boundedQuestion(value, fallback = 0, ids = questionIds) {
   const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed >= 0 && parsed < questionIds.length ? parsed : fallback;
+  return Number.isInteger(parsed) && parsed >= 0 && parsed < ids.length ? parsed : fallback;
 }
 
 function parseBody(event) {
@@ -106,8 +97,9 @@ async function getSessionState(sessionId) {
 async function snapshot(participantId, requestedQuestion, all = false, sessionId = "open") {
   const state = await getState();
   const sessionState = await getSessionState(sessionId);
-  const questionIndex = boundedQuestion(requestedQuestion, boundedQuestion(state.activeQuestion));
-  const questionId = questionIds[questionIndex];
+  const ids = idsForSession(sessionId);
+  const questionIndex = boundedQuestion(requestedQuestion, 0, ids);
+  const questionId = ids[questionIndex];
   const [responseResult, reactionResult] = await Promise.all([
     readAll({ kind: "response", ...(all ? {} : { questionId }) }),
     readAll({ kind: "reaction", ...(all ? {} : { questionId }) }),
@@ -141,7 +133,7 @@ async function snapshot(participantId, requestedQuestion, all = false, sessionId
     },
     sessionState,
     questionIndex,
-    totalQuestions: questionIds.length,
+    totalQuestions: ids.length,
     responses: responses.filter((response) => response.questionId === questionId),
     ...(all ? { allResponses: responses } : {}),
     joinUrl: process.env.PARTICIPANT_JOIN_URL || "",
@@ -159,13 +151,13 @@ function assertHost(payload) {
 
 async function act(payload) {
   const now = new Date().toISOString();
-  const viewQuestion = boundedQuestion(payload.viewQuestionIndex);
   const eventSession = String(payload.sessionId || "open");
+  const viewQuestion = boundedQuestion(payload.viewQuestionIndex, 0, idsForSession(eventSession));
 
   if (payload.action === "submit") {
     const participantId = String(payload.participantId || "").slice(0, 100);
     const questionId = String(payload.questionId || "");
-    if (!participantId || !questionIds.includes(questionId) || typeof payload.data !== "object" || payload.data === null) {
+    if (!participantId || !idsForSession(eventSession).includes(questionId) || typeof payload.data !== "object" || payload.data === null) {
       return reply(400, { error: "回答内容不完整" });
     }
     if (!hasMinimumAnswer(questionId, payload.data)) {
@@ -212,7 +204,7 @@ async function act(payload) {
     const state = await getSessionState(eventSession);
     const revealed = new Set(state.revealedQuestionIds);
     if (payload.action === "setSessionReveal") {
-      if (!questionIds.includes(payload.questionId)) return reply(400, { error: "题目不存在" });
+      if (!idsForSession(eventSession).includes(payload.questionId)) return reply(400, { error: "题目不存在" });
       if (payload.value) revealed.add(payload.questionId);
       else revealed.delete(payload.questionId);
     }

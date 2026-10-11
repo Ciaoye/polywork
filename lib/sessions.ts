@@ -1,5 +1,5 @@
 // Keep question IDs stable when reusing a question, so historical answers match.
-// The 10.12 selection and order will be finalized when its questions arrive.
+// Session selection and order are shared with the API in session-questions.json.
 export const SESSION_1012 = "2026-10-12";
 export function currentSession() {
   if (typeof window === "undefined") return "open";

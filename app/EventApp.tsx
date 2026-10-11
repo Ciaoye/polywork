@@ -4,9 +4,11 @@
 
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { questions, type Question } from "../lib/questions";
+import { questionsForSession, type Question } from "../lib/questions";
 import { currentSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
 import { sitePath } from "../lib/site-paths";
+
+const questions = questionsForSession(currentSession());
 
 type Mode = "landing" | "participant" | "host";
 type AnswerData = Record<string, string | number>;
@@ -335,7 +337,7 @@ function Landing() {
         <a href={sitePath("/join")} className="desktop-icon"><span className="pixel-icon">✎</span><span>加入讨论</span></a>
         <a href={sitePath("/host")} className="desktop-icon"><span className="pixel-icon">▣</span><span>主持展示</span></a>
         <a href={sitePath("/archive")} className="desktop-icon"><span className="pixel-icon">▤</span><span>历史回答</span></a>
-        <a href="#questions" className="desktop-icon"><span className="pixel-icon">?</span><span>十个问题</span></a>
+        <a href="#questions" className="desktop-icon"><span className="pixel-icon">?</span><span>十二个问题</span></a>
       </div>
 
       <WindowFrame title="多元工作与收入探索.exe" className="hero-window">
@@ -367,7 +369,7 @@ function Landing() {
       </aside>
 
       <section className="question-map" id="questions">
-        <WindowFrame title="十个问题 — 从生存现场走向新的默认答案">
+        <WindowFrame title="十二个问题 — 从生存现场走向新的默认答案">
           <div className="question-list">
             {questions.map((question) => (
               <div className="question-file" key={question.id}>
@@ -550,13 +552,12 @@ function Participant() {
           </div>
         </header>
         {error ? <p className="connection-error" role="alert">{error}；当前显示已保存的回答，现场条数尚未确认。</p> : null}
-        {currentSession() !== "open" ? <p className="connection-error">10.12 题目准备中，当前暂列旧题，等待新问题与排序。</p> : null}
         <div className="progress-track"><span style={{ width: `${((snapshot.questionIndex + 1) / snapshot.totalQuestions) * 100}%` }} /></div>
         {!ready ? <div className="connecting win-outset">{error || "正在进入现场……"}</div> : <>
           <nav className="participant-question-nav win-outset" aria-label="选择要回答的问题">
             <div className="participant-question-nav-copy">
               <b>你可以自由选择回答哪一题</b>
-              <span>主持人切题不会打断你正在写的内容</span>
+              <span>{currentSession() === "open" ? "不填写也可以查看大家的全部回答" : "主持人切题不会打断你正在写的内容"}</span>
             </div>
             <div className={`participant-question-picker ${currentSession() === "open" ? "home-question-picker" : ""}`}>
               {questions.map((question, index) => (
@@ -729,7 +730,6 @@ function Host() {
             <button className="text-button" onClick={() => document.documentElement.requestFullscreen?.()}>全屏展示 ↗</button>
           </div>
           {error ? <p className="connection-error" role="alert">{error}</p> : null}
-          {currentSession() !== "open" ? <p className="history-note">10.12 题目准备中，当前暂列旧题，等待新问题与排序。</p> : null}
           {showHome ? <section className="host-home">
             <p className="question-eyebrow">POLYWORK · INCOME · LIFE</p>
             <h1>你在做什么？<br />怎么做？</h1>

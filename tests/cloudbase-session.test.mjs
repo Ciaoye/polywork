@@ -14,7 +14,7 @@ async function harness() {
       return { skip(value) { offset = value; return this; }, limit(value) { limit = value; return this; }, async get() { return { data: [...data.values()].filter((row) => Object.entries(filter).every(([key, value]) => row[key] === value)).slice(offset, offset + limit) }; } };
     },
   };
-  const require = createRequire(import.meta.url);
+  const require = createRequire(new URL("../cloudbase-functions/polywork-event-api/index.js", import.meta.url));
   const context = { exports: {}, process: { env: { HOST_KEY: "test-host-key" } }, Buffer, console, require: (name) => name === "@cloudbase/node-sdk" ? { init: () => ({ database: () => ({ collection: () => collection }) }) } : require(name) };
   vm.runInNewContext(await readFile(new URL("../cloudbase-functions/polywork-event-api/index.js", import.meta.url), "utf8"), context);
   return { main: context.exports.main, data };
@@ -77,5 +77,25 @@ test("host highlighting persists without changing answer text", async () => {
     assert.equal(result.statusCode, 200);
     assert.equal(JSON.parse(result.body).allResponses.find((response) => response.id === "old-0").highlighted, value);
     assert.equal(data.get("old-0").data.text, "历史回答");
+  }
+});
+
+test("home and event indexes follow their own order, with excluded questions unavailable in event", async () => {
+  const { main } = await harness();
+  const get = async (session, question) => JSON.parse((await main({ httpMethod: "GET", queryStringParameters: { all: "1", session, question: String(question) } })).body);
+  assert.equal((await get("open", 11)).totalQuestions, 12);
+  assert.equal((await get("2026-10-12", 7)).totalQuestions, 8);
+  const submit = (sessionId, questionId, viewQuestionIndex, data) => main({ httpMethod: "POST", body: { action: "submit", sessionId, questionId, viewQuestionIndex, participantId: "new-person", all: true, data } });
+  assert.equal((await submit("2026-10-12", "choice-spectrum", 0, { reason: "这是足够长的历史题目回答但是本场并未选取这一题" })).statusCode, 400);
+  assert.equal((await submit("open", "choice-spectrum", 2, { reason: "这是足够长的历史题目回答常驻主页可以继续填写这一题" })).statusCode, 200);
+  const buffer = JSON.parse((await submit("2026-10-12", "one-year-buffer", 2, { note: "这是五年生活费题目的回答用来确认本场第三题正确对应历史题目" })).body);
+  assert.equal(buffer.responses[0].questionId, "one-year-buffer");
+  for (const [questionId, index] of [["labor-institutions", 6], ["questions-for-others", 7]]) {
+    const result = await submit("2026-10-12", questionId, index, { text: "这是新增问题的一份足够长的回答用来确认提交与读取正确" });
+    assert.equal(result.statusCode, 200);
+    const snapshot = JSON.parse(result.body);
+    assert.equal(snapshot.questionIndex, index);
+    assert.equal(snapshot.responses[0].questionId, questionId);
+    assert.deepEqual(snapshot.sessionState.revealedQuestionIds, []);
   }
 });

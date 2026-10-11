@@ -1,3 +1,5 @@
+import sessionQuestionIds from "../cloudbase-functions/polywork-event-api/session-questions.json";
+
 export type QuestionType = "text" | "dual" | "earning" | "spectrum" | "poll" | "value";
 
 export type Question = {
@@ -13,7 +15,7 @@ export type Question = {
   discussion: string[];
 };
 
-export const questions: Question[] = [
+const questionDefinitions: Question[] = [
   {
     id: "self-introduction",
     number: "01",
@@ -57,7 +59,7 @@ export const questions: Question[] = [
     id: "choice-spectrum",
     number: "03",
     eyebrow: "我为什么变成这样",
-    title: "你怎么形成现在这种工作方式？",
+    title: "你是怎么形成现在这种工作方式的？",
     intro: [
       "公司工作、自由职业、创业、gap、失业、数字游民，以及还没有名字的方式，都可能是一个人当下的工作状态。",
       "有人主动选择加入组织，有人主动离开；有人想把收入分散到不同来源，也有人暂时找不到一份足够好的稳定工作。",
@@ -177,7 +179,7 @@ export const questions: Question[] = [
     id: "enough",
     number: "09",
     eyebrow: "我真正想得到什么",
-    title: "怎样的收入、职业或生存状态，才算“成了”？",
+    title: "怎样的收入、职业或生存状态，让你觉得足够好？",
     intro: [
       "你想要的也许是一份稳定工作、一组互不依赖的收入来源、更高的收入、三个月不工作也不焦虑，或者可以随时拒绝不想做的项目。",
       "真正的问题是：你想从工作与收入里得到什么？更多钱、安全、自由、抗风险能力，还是对自己时间的控制权？",
@@ -213,4 +215,28 @@ export const questions: Question[] = [
       "我们能否重新学习如何依赖彼此，而不只是依赖公司？",
     ],
   },
+  {
+    id: "labor-institutions", number: "09", eyebrow: "从个体经验走向劳动保障",
+    title: "你在关注哪些劳动议题？你希望有哪些制度层面关于劳动保障的改善？",
+    intro: ["从个体的体验出发，在灵活用工和就业越来越普遍的今天，你希望有哪些制度层面的改变？"],
+    prompt: "你在关注哪些劳动议题？你希望有哪些制度层面关于劳动保障的改善？",
+    type: "text", placeholder: "从你的体验出发，写下关注的议题与期待的改变……", discussion: [],
+  },
+  {
+    id: "questions-for-others", number: "12", eyebrow: "把问题留给彼此",
+    title: "你还有什么想问其他人的问题？",
+    intro: ["也许会在之后的讨论里出现！"],
+    prompt: "你还有什么想问其他人的问题？",
+    type: "text", placeholder: "写下你想问其他人的问题……", discussion: [],
+  },
 ];
+
+export const questions: Question[] = sessionQuestionIds.open.map((id, index) => ({
+  ...questionDefinitions.find((question) => question.id === id)!,
+  number: String(index + 1).padStart(2, "0"),
+}));
+
+export function questionsForSession(sessionId: string): Question[] {
+  const ids = sessionId === "2026-10-12" ? sessionQuestionIds["2026-10-12"] : sessionQuestionIds.open;
+  return ids.map((id, index) => ({ ...questions.find((question) => question.id === id)!, number: String(index + 1).padStart(2, "0") }));
+}

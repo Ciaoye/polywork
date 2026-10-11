@@ -6,7 +6,7 @@
 
 - 常驻主页：https://ciaoye.github.io/polywork/ 。全部问题与完整阐述，支持手机和电脑；可填写、修改回答，不填写也能浏览全部回答。
 - 本场参与端：https://ciaoye.github.io/polywork/1012/ 。仅本场选定问题，默认隐藏所有回答（包括自己的回答和历史回答）；主持人逐题揭晓后显示本场及可展开的历史，支持点赞投票。
-- 本场主持端：http://localhost:3000/host/1012/ 。完整本场题目，默认隐藏回答；主持人揭晓、重新收起、逐条高亮。本场新旧问题与顺序等待文案确认，目前暂列旧题。
+- 本场主持端：http://localhost:3000/host/1012/ 。完整本场题目，默认隐藏回答；主持人揭晓、重新收起、逐条高亮。本场按确认顺序选取 8 题，主页保留全部 12 题。
 
 ## 本地主持启动
 
@@ -39,6 +39,6 @@ node --test tests/cloudbase-session.test.mjs
 npm test
 ```
 
-GitHub Pages 从唯一活动仓库 polywork 的 main 部署。常驻主页的问题库在 lib/questions.ts；10.12 最终选题和排序收到文案后配置，旧题稳定 ID 保留用于历史匹配。
+GitHub Pages 从唯一活动仓库 polywork 的 main 部署。常驻主页的问题库在 lib/questions.ts；10.12 选取其中 8 题，顺序由 cloudbase-functions/polywork-event-api/session-questions.json 与前后端共享；旧题稳定 ID 保留用于历史匹配。
 
 部署云函数前先运行 `node scripts/prepare-cloudbase-config.mjs`，再使用生成的忽略文件 `work/cloudbase-deploy/cloudbaserc.json` 作为 CLI 的 --config-file，避免遗漏本地主持密钥。不要直接用不含密钥的公开配置覆盖云函数环境变量。
