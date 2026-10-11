@@ -240,3 +240,18 @@ export function questionsForSession(sessionId: string): Question[] {
   const ids = sessionId === "2026-10-12" ? sessionQuestionIds["2026-10-12"] : sessionQuestionIds.open;
   return ids.map((id, index) => ({ ...questions.find((question) => question.id === id)!, number: String(index + 1).padStart(2, "0") }));
 }
+
+export const participantTitles: Record<string, string> = {
+  "self-introduction": "你会怎么介绍自己？",
+  "income-map": "你现在靠什么活着？",
+  "choice-spectrum": "你的工作方式是怎么形成的？",
+  "one-year-buffer": "如果有五年生活费呢？",
+  "earning-story": "哪次赚钱最满意或有趣？",
+  "body-memory": "什么时候干活最舒服？",
+  "enough": "怎样才觉得足够好？",
+  "new-default": "如果不再默认找工作？",
+  "labor-institutions": "你在关注哪些劳动议题？",
+  "solo-company": "一个人能成为一家公司吗？",
+  "valuable-thing": "你最“值钱”的技能是什么？",
+  "questions-for-others": "你想问其他人什么？",
+};

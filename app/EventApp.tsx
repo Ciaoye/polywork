@@ -4,7 +4,7 @@
 
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { questionsForSession, type Question } from "../lib/questions";
+import { participantTitles, questionsForSession, type Question } from "../lib/questions";
 import { currentSession, submissionSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
 import { sitePath } from "../lib/site-paths";
 
@@ -574,9 +574,11 @@ function Participant() {
           </nav>
           <section className="participant-question">
             <p className="question-eyebrow">{snapshot.question.number} / {snapshot.question.eyebrow}</p>
-            <h1>{snapshot.question.title}</h1>
-            {snapshot.question.prompt.trim() !== snapshot.question.title.trim() && <p className="question-prompt">{snapshot.question.prompt}</p>}
-            <div className="question-detail">{snapshot.question.intro.map((paragraph) => <p className="short-intro" key={paragraph}>{paragraph}</p>)}</div>
+            <h1>{participantTitles[snapshot.question.id] || snapshot.question.title}</h1>
+            <p className="question-prompt">
+              {snapshot.question.title}
+              {snapshot.question.prompt.trim() !== snapshot.question.title.trim() && <> {snapshot.question.prompt}</>}
+            </p>
           </section>
           <form className="answer-form win-outset" onSubmit={submit}>
             <div className="title-bar small"><strong>{mode === "static" ? "历史数据只读" : saved ? "修改我的回答" : "写下我的回答"}</strong><span>{mode === "static" ? "活动已结束" : "匿名提交 · 至少 15 个字"}</span></div>

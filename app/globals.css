@@ -283,3 +283,8 @@ textarea:focus { border-color: #29261f; }
 }
 
 .host-question blockquote { margin: 0 0 22px; }.archive-question-prompt + .archive-question-intro { margin-top: 22px; }
+
+/* Each surface has its own question presentation. */
+.participant-question .question-prompt { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; font-weight: 400; font-size: 20px; line-height: 1.75; }
+.host-question blockquote { background: #faf7ed; border-left-color: #dce7cd; font-size: clamp(18px, 1.5vw, 24px); line-height: 1.6; }
+@media (max-width: 640px) { .participant-question .question-prompt { font-size: 18px; } }

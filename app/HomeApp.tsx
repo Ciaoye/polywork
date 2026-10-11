@@ -89,9 +89,10 @@ export default function HomeApp() {
         return <article className="archive-question home-question" id={`question-${question.id}`} key={question.id}>
           <div className="archive-question-heading"><div><p className="question-eyebrow">{question.number} / {question.eyebrow}</p><h2>{question.title}</h2></div><b>{ordered.length} 条</b></div>
           <div className="home-question-copy">
-            {question.prompt.trim() !== question.title.trim() && <p className="home-prompt">{question.prompt}</p>}
-            <div className="archive-question-intro"><p>{question.intro[0]}</p></div>
-            {question.intro.length > 1 ? <details className="home-question-detail"><summary>展开更多背景说明</summary><div className="archive-question-intro">{question.intro.slice(1).map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div></details> : null}
+            <div className="archive-question-intro">
+              {question.prompt.trim() !== question.title.trim() && <p>{question.prompt}</p>}
+              {question.intro.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+            </div>
           </div>
           <div className="home-answer-toolbar"><span>点赞最多的回答先出现</span><details className="home-compose"><summary>{own ? "修改我的回答" : "填写我的回答"} ✎</summary><HomeAnswerForm question={question} own={own} disabled={Boolean(error)} onSubmit={submit} /></details></div>
           <div className="archive-response-grid home-response-grid" aria-label={`${question.title}的回答`}>
