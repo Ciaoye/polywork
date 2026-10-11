@@ -4,7 +4,7 @@
 
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { participantTitles, questionsForSession, type Question } from "../lib/questions";
+import { participantDescriptions, participantTitles, questionsForSession, type Question } from "../lib/questions";
 import { currentSession, submissionSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
 import { sitePath } from "../lib/site-paths";
 
@@ -576,8 +576,7 @@ function Participant() {
             <p className="question-eyebrow">{snapshot.question.number} / {snapshot.question.eyebrow}</p>
             <h1>{participantTitles[snapshot.question.id] || snapshot.question.title}</h1>
             <p className="question-prompt">
-              {snapshot.question.title}
-              {snapshot.question.prompt.trim() !== snapshot.question.title.trim() && <> {snapshot.question.prompt}</>}
+              {participantDescriptions[snapshot.question.id] || snapshot.question.prompt}
             </p>
           </section>
           <form className="answer-form win-outset" onSubmit={submit}>
