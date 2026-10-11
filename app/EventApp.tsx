@@ -5,7 +5,7 @@
 import QRCode from "qrcode";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { questionsForSession, type Question } from "../lib/questions";
-import { currentSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
+import { currentSession, submissionSession, publishedSnapshotUrl, publishedSignalUrl } from "../lib/sessions";
 import { sitePath } from "../lib/site-paths";
 
 const questions = questionsForSession(currentSession());
@@ -492,7 +492,8 @@ function Participant() {
   const [saved, setSaved] = useState(false);
   const [validationError, setValidationError] = useState("");
   const hydratedRef = useRef("");
-  const own = snapshot.responses.find((response) => response.participantId === participantId && response.sessionId === currentSession());
+  const answerSession = submissionSession(snapshot.question.id);
+  const own = snapshot.responses.find((response) => response.participantId === participantId && response.sessionId === answerSession);
   const displayedResponses = currentAnswers(snapshot);
 
   useEffect(() => {
@@ -580,6 +581,7 @@ function Participant() {
           <form className="answer-form win-outset" onSubmit={submit}>
             <div className="title-bar small"><strong>{mode === "static" ? "历史数据只读" : saved ? "修改我的回答" : "写下我的回答"}</strong><span>{mode === "static" ? "活动已结束" : "匿名提交 · 至少 15 个字"}</span></div>
             <div className="form-body">
+              {currentSession() === "open" && answerSession !== "open" ? <p className="saved-note">这题的回答也会加入 10.12 本场讨论；在这里和现场可以继续修改同一份回答。</p> : null}
               <fieldset disabled={mode === "static" || Boolean(error)} className="static-fieldset">
                 <QuestionFields question={snapshot.question} form={form} setForm={setForm} />
                 <button className="os-button primary submit-button" disabled={saving || mode === "static" || Boolean(error)}>{mode === "static" ? "活动已结束" : saving ? "正在放到大屏幕……" : saved ? "保存修改" : "匿名提交"}</button>

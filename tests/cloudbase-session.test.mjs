@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import vm from "node:vm";
 import test from "node:test";
 
-async function harness() {
+async function harness(now = "2026-10-10T00:00:00.000Z") {
   const data = new Map([["state", { _id: "state", activeQuestion: 0, revealAnswers: true }]]);
   for (let i = 0; i < 205; i++) data.set(`old-${i}`, { _id: `old-${i}`, kind: "response", questionId: "self-introduction", participantId: `p-${i}`, data: { text: "历史回答" }, updatedAt: "2026-08-12" });
   const collection = {
@@ -15,7 +15,11 @@ async function harness() {
     },
   };
   const require = createRequire(new URL("../cloudbase-functions/polywork-event-api/index.js", import.meta.url));
-  const context = { exports: {}, process: { env: { HOST_KEY: "test-host-key" } }, Buffer, console, require: (name) => name === "@cloudbase/node-sdk" ? { init: () => ({ database: () => ({ collection: () => collection }) }) } : require(name) };
+  class ClockDate extends Date {
+    constructor(...args) { super(...(args.length ? args : [now])); }
+    static now() { return Date.parse(now); }
+  }
+  const context = { exports: {}, Date: ClockDate, process: { env: { HOST_KEY: "test-host-key" } }, Buffer, console, require: (name) => name === "@cloudbase/node-sdk" ? { init: () => ({ database: () => ({ collection: () => collection }) }) } : require(name) };
   vm.runInNewContext(await readFile(new URL("../cloudbase-functions/polywork-event-api/index.js", import.meta.url), "utf8"), context);
   return { main: context.exports.main, data };
 }
@@ -97,5 +101,36 @@ test("home and event indexes follow their own order, with excluded questions una
     assert.equal(snapshot.questionIndex, index);
     assert.equal(snapshot.responses[0].questionId, questionId);
     assert.deepEqual(snapshot.sessionState.revealedQuestionIds, []);
+  }
+});
+
+test("home prefill joins event, edits same response and preserves older home answers", async () => {
+  const { main, data } = await harness("2026-10-11T04:00:00.000Z");
+  data.set("old-open", { _id: "old-open", kind: "response", sessionId: "open", questionId: "self-introduction", participantId: "p-0", data: { text: "之前主页的回答必须保留" }, updatedAt: "2026-10-10" });
+  const post = (sessionId, questionId, answer, index = 0) => main({ httpMethod: "POST", body: { action: "submit", sessionId, participantId: "p-0", questionId, data: answer, viewQuestionIndex: index, all: true } });
+  const prefill = JSON.parse((await post("open", "self-introduction", { text: "这是提前在主页填写的回答应当进入十月十二日本场" })).body);
+  const eventAnswer = prefill.responses.find(row => row.sessionId === "2026-10-12");
+  assert.ok(eventAnswer);
+  assert.equal(prefill.totalQuestions, 12);
+  assert.equal(prefill.sessionState.sessionId, "open");
+  await post("2026-10-12", "self-introduction", { text: "这是现场修改过的回答应该和提前填写的共用一条记录" });
+  await post("open", "self-introduction", { text: "这是再次从主页修改的回答还是同一条本场记录不会重复" });
+  assert.equal(data.get("old-open").data.text, "之前主页的回答必须保留");
+  const eventRows = [...data.values()].filter(row => row.kind === "response" && row.sessionId === "2026-10-12");
+  assert.equal(eventRows.length, 1);
+  assert.equal(eventRows[0]._id, eventAnswer.id);
+  assert.match(eventRows[0].data.text, /再次从主页/);
+  const excluded = JSON.parse((await post("open", "choice-spectrum", { reason: "这是本场未选的问题提前从主页填写也只会留在常驻题库" }, 2)).body);
+  assert.equal(excluded.responses[0].sessionId, "open");
+  const eventView = JSON.parse((await main({ httpMethod: "GET", queryStringParameters: { session: "2026-10-12", all: "1" } })).body);
+  assert.deepEqual(eventView.sessionState.revealedQuestionIds, []);
+  assert.ok(eventView.responses.some(row => row.id === eventAnswer.id));
+});
+test("home prefill window ends and new answers return to permanent home", async () => {
+  for (const now of ["2026-10-11T03:39:33.999Z", "2026-10-12T16:00:00.000Z"]) {
+    const { main } = await harness(now);
+    const result = await main({ httpMethod: "POST", body: { action: "submit", sessionId: "open", participantId: "new-person", questionId: "labor-institutions", data: { text: "这是预填时间窗口外填写的回答应该继续属于常驻主页" }, viewQuestionIndex: 8, all: true } });
+    assert.equal(result.statusCode, 200);
+    assert.equal(JSON.parse(result.body).responses[0].sessionId, "open");
   }
 });

@@ -6,6 +6,7 @@ const app = cloudbase.init({ env: cloudbase.SYMBOL_DEFAULT_ENV });
 const db = app.database();
 const collection = db.collection("polywork_events");
 const sessionQuestionIds = require("./session-questions.json");
+const homeEnrollment = require("./home-enrollment.json");
 const questionIds = sessionQuestionIds.open;
 function idsForSession(sessionId) { return sessionQuestionIds[sessionId] || questionIds; }
 const MIN_ANSWER_LENGTH = 15;
@@ -163,8 +164,10 @@ async function act(payload) {
     if (!hasMinimumAnswer(questionId, payload.data)) {
       return reply(400, { error: `回答至少需要 ${MIN_ANSWER_LENGTH} 个字` });
     }
-    const sessionId = String(payload.sessionId || "open");
-    if (!["open", "2026-10-12"].includes(sessionId)) return reply(400, { error: "场次不存在" });
+    if (!["open", "2026-10-12"].includes(eventSession)) return reply(400, { error: "场次不存在" });
+    const enrollFromHome = eventSession === "open" && now >= homeEnrollment.startsAt && now < homeEnrollment.endsAt
+      && idsForSession(homeEnrollment.sessionId).includes(questionId);
+    const sessionId = enrollFromHome ? homeEnrollment.sessionId : eventSession;
     const id = stableId(sessionId, questionId, participantId);
     const existing = first(await collection.doc(id).get());
     await collection.doc(id).set({
