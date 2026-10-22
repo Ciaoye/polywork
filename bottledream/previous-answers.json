@@ -1,0 +1,653 @@
+[
+  {
+    "text": "56个女工案里，有56个身份证复印件，而且全是花的，看不清楚人。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-0",
+    "previous": true
+  },
+  {
+    "text": "我其实第一次明确95年我们国家才有劳动法，在那以前只有国家单位有劳动保障，包括周立太本人，其实在80年代在煤窑打工的时候被欠薪是没办法有救济渠道的。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-1",
+    "previous": true
+  },
+  {
+    "text": "死亡赔偿的标准是地方平均工资x20年（不确定细节了，但大概）的一个基数，就感觉人命是在法律层面有明确定价的。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-2",
+    "previous": true
+  },
+  {
+    "text": "原来周立太第一个断手官司，那个被反复提及3万到17万的官司，就是当事人跑路的官司……我一直以为是后来。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-3",
+    "previous": true
+  },
+  {
+    "text": "在一些工伤记录里，有关于死亡的证明，你会看到一份心电图，从曲折到变成直线。这是一份死亡的证据。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-4",
+    "previous": true
+  },
+  {
+    "text": "一个比较陌生的时代背景。之前只是听说过那个时代，但是对于那个时代具体的规则和情况是不了解的。通过卷宗的一些细节，了解到那个蛮荒时代很多令人叹为观止的操作。从陈用钢案可以看到，一个企业可以很轻易的逃脱自己本应负责的员工保险，以及出现工伤之后的赔付，并且可以轻易的金蝉脱壳，换个壳子继续经营。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-5",
+    "previous": true
+  },
+  {
+    "text": "我记住的是周立太被帮助的人伤害，还有很多的照片，大大的年份很清晰",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-6",
+    "previous": true
+  },
+  {
+    "text": "我记得在挣扎纪录片里，大家讲自己的故事，就是一个人亲身讲述自己为什么要来到大城市（为了赚钱，为了未来），然后遭遇了这样的事情工伤，钱也没赚到，未来完全不知道怎么办了。然后在周立太那里吃住，叫周立太大哥。感觉周立太为他们指了一条路径，能得到赔偿，能先活下来。然后记得周立太说：先活着，才能谈人权。下一个印象最深的点就是有农民工最后也成为律师事务所的工作人员，同时很多农民工还欠着他的钱。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-7",
+    "previous": true
+  },
+  {
+    "text": "这个我印象最深的第一个最开始的动线是1995年劳动法的出现的开头，我觉得这个特别可以把所有的观众都拉到一个处境下来理解这些档案。还有就是一个藏在当时展览背后的动机，就是我们是将8000份法言法语的档案变成了可视化有逻辑的呈现化方式。我觉得这个方法本身是非常值得再次去推广了。还有就是不同的人对不同的案卷的理解方式和呈现。我觉得有点不足的是，龙潭媒体和律师和案子的互动这部分可以再多一点的。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-8",
+    "previous": true
+  },
+  {
+    "text": "法律给身体的定价，一双手的价格二十年翻了xx倍",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-9",
+    "previous": true
+  },
+  {
+    "text": "农民工的第一视角诉说的真实困境，工伤后的孤立无援，因为不懂法律没有关系被拿捏。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-10",
+    "previous": true
+  },
+  {
+    "text": "工厂主为了利益最大化，不加装安全设备无视风险，不把工人当人，出事后各种甩锅手段，推卸责任。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-11",
+    "previous": true
+  },
+  {
+    "text": "周立太的工作日常生活，打官司期间收留工友一起生活，和孤勇者一样做自己觉得正确的事，推进法治进步。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-12",
+    "previous": true
+  },
+  {
+    "text": "我希望有一个大的时间线。案件 - 法律政策变化 - 媒体等等，就是能看到这个历史进展和变迁。还有一个我印象深刻的是周立太的照片，一身黑衣服，非常严肃，背后是层层叠叠的档案。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-13",
+    "previous": true
+  },
+  {
+    "text": "国家在劳动法方面的进展。随着时代发展，技术迭代导致的进展。全国数据打通带来监管方面的进展。执行层面，限制高消费等措施的落实。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-14",
+    "previous": true
+  },
+  {
+    "text": "如果是一份材料那希望是一个时间轴，譬如工伤赔付的时间轴。一个案件可以是彭刚中案，一个人可以是周立太吧。。。一个问题我觉得还是如何将法言法语的档案变成更和今天阅读习惯语境更搭的可视化方法。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-15",
+    "previous": true
+  },
+  {
+    "text": "一个案件62个女工案，除了身体受伤还有珍贵的东西需要被看见",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-16",
+    "previous": true
+  },
+  {
+    "text": "一个问题：个体代替不了制度，如果没有这样的律师世界怎么办？",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-17",
+    "previous": true
+  },
+  {
+    "text": "一个图片，一些数据，以及周立太做这些事所遇见的困难，包括钱的部分。看见大的叙事下个人有很多具体的需要和困境",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-18",
+    "previous": true
+  },
+  {
+    "text": "身份证复印件脱敏件。我觉得这是最具象的人在卷宗里留下的东西。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-19",
+    "previous": true
+  },
+  {
+    "text": "我觉得是很多人用自己的亲身经历、用自己的身体留下的历史，断手断脚，是真实的记录。每一个卷宗里面可能都有：受伤的证据，劳动的证据，死亡的证据，一个具体的人是怎么用这种方式被记录下来的。很难想象以前的人过的那样的生活，在我的想象中是什么斯坦福铁路的华人劳工，伦敦蒸汽机厂的工人，但可能只是二十年前的中国。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-20",
+    "previous": true
+  },
+  {
+    "text": "它是一个尚待挖掘的素材集，这个里面有从95年开始到今天被折叠的很多时代发展的记忆。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-21",
+    "previous": true
+  },
+  {
+    "text": "我觉得今天我们的时代进展的特别特别特别快，所以很多时候你回想10年前、20年前、30年前，你可能并不知道很多细节，只记得「这是改革开放高速发展的时代！」——这种表述，让我觉得太简单了。有那么多人的故事，在这个期间发生了那么复杂的人生变化，而且他们有极强的属于时代发展的相似性轨迹，例如杀马特的发型和他们生活的关系，我感觉这个档案馆的内容里，一定还有很多没被人了解到的更细节的事情，而不是简单的被概括为「工伤赔偿」、「行政纠纷」这些词语。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-22",
+    "previous": true
+  },
+  {
+    "text": "我觉得整个资料库是一个时代变迁的缩影。一些比较久远的卷宗对当下没有太多借鉴意义。但是纵览下来可以很清晰的展现出我们国家改革开放几十年间，时代的巨变对打工人，对企业，以及相关政府职能部门产生的影响。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-23",
+    "previous": true
+  },
+  {
+    "text": "通过一个律师的工作，看到劳动权益在过去的30多年是如何在具体的人身上发生变化的。而这个档案馆让“看到”这个动作和理解变的有上下文和更有逻辑。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-24",
+    "previous": true
+  },
+  {
+    "text": "工商赔偿案在时代下的缩影，个人和制度的共存和发展",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-25",
+    "previous": true
+  },
+  {
+    "text": "个人维权的艰难与大量琐碎的工作，带着未知的结果与不断地挫败",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-26",
+    "previous": true
+  },
+  {
+    "text": "用某种媒介去让大家切身感受到所谓的时代发展中的阵痛",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-27",
+    "previous": true
+  },
+  {
+    "text": "人命可以是价格，一只手一只脚也可以是价格。只有当这个价格足够高，才会被人重视。以及我发现我一开始觉得周立太是个伟大的人，后面发现他还是很伟大，但是这个伟大也是某种造神，他并不想做公益，他是一名律师，他需要钱生活。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-28",
+    "previous": true
+  },
+  {
+    "text": "法律条款是建立在极端案件（人身安全等）的基础上更新的",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-29",
+    "previous": true
+  },
+  {
+    "text": "我以前不知道，原来法律的边界，是一点一点被案例塑造的。不是说法规今天规定那条线在某个具体的位置，它是很模糊的，于是对于人来讲，是有争取的空间的。并且，假如有律师、媒体、政府等多方力量的配合，政策法规是真的会朝向我们认可的方向发展变化的，只是它需要很漫长的时间，和具体的人持续不断的去推动。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-30",
+    "previous": true
+  },
+  {
+    "text": "我原来觉得这些档案是艰涩的很难被公众再次去消化的。后来发现这些内容再次激发公众讨论是可能的。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-31",
+    "previous": true
+  },
+  {
+    "text": "开始之前我是带着猎奇的角度看的，猜测里面会有一些比较猎奇的案件，比较狗血的剧情。接触之后确实看到了一些猎奇的内容，但是让我改观的是，我后来突然意识到卷宗里的每个人都是活生生人。里面的每一个卷宗都是彻底改变一个人人生的大事件。一卷卷卷宗其实就是一个个生动的人生百态。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-32",
+    "previous": true
+  },
+  {
+    "text": "现在大家的处境如何呢？劳动权益的环境更好了吗？我们带着这样的历史，可以走向更好的未来吗？",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-33",
+    "previous": true
+  },
+  {
+    "text": "他的钱追回来多少，比例多少？",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-34",
+    "previous": true
+  },
+  {
+    "text": "假如8000多卷卷宗，全都扫完了，那人们该怎么进入阅读呢？也是很夸张的数据量啊。怎么样，才能让人们真正的去读一读一些材料，而不是只读AI生成的部分呢？",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-35",
+    "previous": true
+  },
+  {
+    "text": "这么庞大的资料库如何能持续与当下的人，尤其是当下的年轻人产生链接。而不会被大家当做一堆故纸堆而不愿意去看。我觉得游戏是一种比较好的形式。",
+    "name": "共同策展 · 伙伴回答",
+    "questionId": "impression",
+    "id": "previous-impression-36",
+    "previous": true
+  },
+  {
+    "text": "不喜欢甲方指指点点，各种PUA",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-0",
+    "previous": true
+  },
+  {
+    "text": "能有持续的金钱和认可度，可以让自己接触到更广阔的平台和视野",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-1",
+    "previous": true
+  },
+  {
+    "text": "我的心可能比较大，无论身上有多少钱，有钱或者没钱，我都好好的体验了许多东西，活得好好的。曾经我也认为要有一些钱，但现在对我来说“成了”大概是有了“无论怎样我都信任自己可以活的非常好，并且始终走在能够实现人生意义的道路上（也许这件事也没那么重要，它只是借着我的相信，顺便发生着）”的心吧",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-2",
+    "previous": true
+  },
+  {
+    "text": "睡得着觉 不会焦虑 想做就做 自由",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-3",
+    "previous": true
+  },
+  {
+    "text": "我觉得在所生活的城市能覆盖最最基础的吃喝住运动体验新事物同时可以大量自由支配自己的时间。我觉得就还不错。如果有更多的收入能进行财务分配更好",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-4",
+    "previous": true
+  },
+  {
+    "text": "我现在就很满意，各种需求都能满足，按我喜欢的方式，一切都良好。这个满意好像也是发现这个状态是可持续的，几年过去了，我还是不错啊。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-5",
+    "previous": true
+  },
+  {
+    "text": "我现在觉得已经可以了，但这不是会百分百一直持续的\n\n我想探索怎样用更少的工作得到更多的收入",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-6",
+    "previous": true
+  },
+  {
+    "text": "有被动收入。随时可以开启自己喜欢的事情，并用它来赚钱生存。不受地理位置的限制。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-7",
+    "previous": true
+  },
+  {
+    "text": "感受到生命的喜悦，兴致勃勃的行动",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-8",
+    "previous": true
+  },
+  {
+    "text": "想干啥就干啥 有价值感  有资源  有充沛的价值回报",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-9",
+    "previous": true
+  },
+  {
+    "text": "活得下去就好",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-10",
+    "previous": true
+  },
+  {
+    "text": "一个月起码能挣到一万块钱",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-11",
+    "previous": true
+  },
+  {
+    "text": "被动收入托底（个人资产的保值）+自己长期做的有稳定性盈利的工作（譬如艺术作品）+一些感兴趣的项目会有灵活收入。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-12",
+    "previous": true
+  },
+  {
+    "text": "可以随时拒绝不想做的任何事。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-13",
+    "previous": true
+  },
+  {
+    "text": "把自己的能力更多地向外延伸，更充分的价值交换，流动的",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-14",
+    "previous": true
+  },
+  {
+    "text": "做自己想做的事，能覆盖生活成本，就好，然后就自然地越做越好，到能做到的程度。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-15",
+    "previous": true
+  },
+  {
+    "text": "时间自由，精神自由",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-16",
+    "previous": true
+  },
+  {
+    "text": "能睡的着觉。真的。真的。我只有这一个诉求。而不是现在被续命着却什么都做不了。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-17",
+    "previous": true
+  },
+  {
+    "text": "钱，安全感，自由，对时间的控制，我都想要，我最想去的其实还是张韶涵演唱会",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-18",
+    "previous": true
+  },
+  {
+    "text": "杜绝内心的无聊，完成对过去努力的一种交付，还和社会保持一定的联系。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-19",
+    "previous": true
+  },
+  {
+    "text": "有基础的现金流，有安全感，社会网络支撑，做些有意思的事情",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-20",
+    "previous": true
+  },
+  {
+    "text": "有一份相对稳定的收入托底，然后工作时间地点相对自由，与人有交互，工作相关的人事物都可持续",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-21",
+    "previous": true
+  },
+  {
+    "text": "有一份稳定的收入，有一份兼职用来突破上限，还有能够找到共同兴趣的人的活动。比较需要安全感和自由",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-22",
+    "previous": true
+  },
+  {
+    "text": "想要赚购钱交保险，申请签证，以及有一年的fuck you money，然后不要让自己太累。我希望能够摆脱恐惧",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-23",
+    "previous": true
+  },
+  {
+    "text": "我想心安理得的种地、吃自己种出来的蔬果、吃自己用手做出来的面包和馒头。也需要一些钱，但是这些钱是以很轻松的方式获得的，我有充足的时间去做我自己想做的事",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-24",
+    "previous": true
+  },
+  {
+    "text": "有很棒的支持网络，和爱的人一起生活工作",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-25",
+    "previous": true
+  },
+  {
+    "text": "选择的自由，可以选择也可以不选择。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-26",
+    "previous": true
+  },
+  {
+    "text": "自由和对时间的支配权。在这个基础上做自己想做和感兴趣的事情",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-27",
+    "previous": true
+  },
+  {
+    "text": "有份有荣誉的工作吧，有25年生活费的存款吧，100万存款差不多，追求荣誉吧",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-28",
+    "previous": true
+  },
+  {
+    "text": "财富自由，可以享受孤独，完成自我课题",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-29",
+    "previous": true
+  },
+  {
+    "text": "首先是自由其次是安全感这俩最重要，与其说是对时间的控制倒不如说是选择权，好想急头白脸没有任何物质和心理负担的尽情做自己想做的创作，有自己的节奏想躺就躺，没人催促，没人用社会标准要求你，没人说别人怎样怎样做，所以我也要你做出这样的东西",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-30",
+    "previous": true
+  },
+  {
+    "text": "一笔资助或者一笔奖金覆盖一年的支出，其余时间凭兴趣输入输出，想要好的人际关系和自尊，想要谈恋爱",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-31",
+    "previous": true
+  },
+  {
+    "text": "钱多事少离家近，哈哈哈哈，我感觉最主要是金钱，以及金钱所带来的安全感和自由",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-32",
+    "previous": true
+  },
+  {
+    "text": "收入够日常花销即可，安然入睡，新鲜醒来，一天中大部分是专注的时间，睡的饱吃简单烹饪的食物。我想要的:当下是舒服的，醒来是精力充沛的，对接下来的时间是专注投入的，是有些许期待的!",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-33",
+    "previous": true
+  },
+  {
+    "text": "我希望可以发挥我的创意，然后获得的收入不是我出卖时间和精力，而是可以有复利价值的一些收入，并且我希望我在真实地让这个世界变得更好。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-34",
+    "previous": true
+  },
+  {
+    "text": "我的需要是独立自主，能够让我独立自主的东西就是好的。希望我随时有选择的自由，钱可以多点的，体验也想更丰富，希望和朋友互帮互助。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-35",
+    "previous": true
+  },
+  {
+    "text": "有意义，自由，安全感，健康，满足感..",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-36",
+    "previous": true
+  },
+  {
+    "text": "有时候感觉可能是缺点爱，这种抽象的东西。希望工作反馈及时一些，能够有持续的价值流动，能为这个世界多创造一些价值，我现在在尝试着去做正念小组社群，尝试接触疗愈来转型",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-37",
+    "previous": true
+  },
+  {
+    "text": "抽象的版本是，希望可以达到和万物合一的状态，能够更靠近内心直觉声音，这样想做什么就做什么，想创造的时候就去创造，当达成合一的状态之后不会再有金钱不安全感。具像化来说就是，从当下出发，每个当下都做此刻最想做的，可以从不同形式的创造、学习和休息的过程中生长更多生命力，创造好东西收获金钱或者其他形式的回报",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-38",
+    "previous": true
+  },
+  {
+    "text": "可持续的生活，喜欢的环境，自己想做的事，和他人的链接",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "enough",
+    "id": "previous-enough-39",
+    "previous": true
+  },
+  {
+    "text": "未来越来越多地倾向于做这个创造性，创意型工作，然后就是AI可以免费无限次地用",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-0",
+    "previous": true
+  },
+  {
+    "text": "更多的零工能够比较体面，同工同酬，保障",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-1",
+    "previous": true
+  },
+  {
+    "text": "社会基础收入和保障，待业，身心支持",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-2",
+    "previous": true
+  },
+  {
+    "text": "没了解过，反正我打工的时候都没啥保障，滑雪买了个意外险。自己保障自己，之前学中医可以上，不做危险的劳动。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-3",
+    "previous": true
+  },
+  {
+    "text": "希望社保医保培训能完善一点，不用有后顾之忧",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-4",
+    "previous": true
+  },
+  {
+    "text": "基础的安全保障，比如买保险；多一些法律财务方面的科普",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-5",
+    "previous": true
+  },
+  {
+    "text": "灵活就业和社保、数字劳工、零工经济",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-6",
+    "previous": true
+  },
+  {
+    "text": "外卖骑手的保障，对我做过骑手，然后最近也在拍女外卖骑手为主题的摄影作品。我希望所有骑手的医疗保险以及互助措施能更好",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-7",
+    "previous": true
+  },
+  {
+    "text": "职业的“高低贵贱“之分，也就是常人所定义的好工作\n关于灵活用工，招聘渠道更透明化、工资结算更快捷",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-8",
+    "previous": true
+  },
+  {
+    "text": "签了合同最后赖账的情况下，希望能有法律更好的约束和制裁制度",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-9",
+    "previous": true
+  },
+  {
+    "text": "过度劳动方面，工作时间长过了，生活时间生活方面的追求都边边角角感到难受",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-10",
+    "previous": true
+  },
+  {
+    "text": "当然是社保问题 还有多一点休息日…",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-11",
+    "previous": true
+  },
+  {
+    "text": "残障者找工作，兼职，合同，最低工资，pua，npd老板",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-12",
+    "previous": true
+  },
+  {
+    "text": "比较关注强制加班，以及薪资避税等方面",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-13",
+    "previous": true
+  },
+  {
+    "text": "在面对海外主体国内公司的合同的时候，如何保障自己的权益",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-14",
+    "previous": true
+  },
+  {
+    "text": "女男不同工同酬。零工没有最低工资保障，以满足打工者的基本尊严。工作时间和休假不成比例，休假成为体制内福利。",
+    "name": "多元收入工作坊 · 回答",
+    "questionId": "protection",
+    "id": "previous-protection-15",
+    "previous": true
+  }
+]

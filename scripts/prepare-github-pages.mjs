@@ -11,3 +11,6 @@ for (const route of ["join", "host", "archive", "1012", "host/1012"]) {
 
 await cp(index, new URL("404.html", root));
 await writeFile(new URL(".nojekyll", root), "", "utf8");
+
+await mkdir(new URL("bottledream/", root), { recursive: true });
+await cp(new URL("../bottledream/", import.meta.url), new URL("bottledream/", root), { recursive: true });

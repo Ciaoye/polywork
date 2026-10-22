@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#eee9df"><title>三张问题墙 · 瓶行宇宙</title><link rel="stylesheet" href="style.css"></head>
+<body><header><span>周立太数字档案馆 × 瓶行宇宙</span><span>一起留下想法 ↗</span></header>
+<main><div class="intro"><p class="eyebrow">THREE QUESTIONS / 三张问题墙</p><h1>看见彼此的回答。</h1><p>读一读大家的想法，也留下一点你的感受。<br>选一个问题开始，想写几题都可以。</p></div>
+<nav aria-label="选择问题"><button data-q="0" aria-pressed="true">01 档案</button><button data-q="1" aria-pressed="false">02 生活</button><button data-q="2" aria-pressed="false">03 劳动保障</button></nav>
+<section class="question"><div><p class="eyebrow" id="number"></p><h2 id="question"></h2></div><a href="#write">写下我的回答 ↓</a></section>
+<div class="wall-heading"><h3>大家的回答 <span id="count"></span></h3><button id="refresh" type="button">刷新回答 ↻</button></div><p id="load-status" role="status" aria-live="polite"></p><div id="wall" class="wall"></div>
+<section id="write"><div><p class="eyebrow">YOUR WORDS / 你的声音</p><h2>把你的想法<br>贴到这面墙上。</h2><p>回答提交后会公开显示在这里。</p></div><form><label for="answer">你的回答</label><textarea id="answer" required maxlength="4000" rows="6" placeholder="一个细节、一段经历，或一个还没想明白的念头……"></textarea><div class="form-bottom"><div><label for="name">署名 <span>（选填）</span></label><input id="name" maxlength="60" placeholder="不填就是匿名朋友" autocomplete="nickname"></div><button id="submit">贴上回答 ↗</button></div><p id="submit-status" role="status" aria-live="polite"></p></form></section>
+<footer>三张问题墙 · 每一种具体的生活，都值得被看见。</footer></main><script src="app.js"></script></body></html>
