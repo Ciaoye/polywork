@@ -14,6 +14,7 @@ function render() {
   document.querySelectorAll('nav button').forEach((b,i) => b.setAttribute('aria-pressed', String(i === active)));
   const rows = [...answers, ...previous].filter(a => a.questionId === questions[active].id);
   $('count').textContent = `${rows.length} 条`;
+  if (rows.length && $('load-status').textContent.includes('这面墙还没有回答')) $('load-status').textContent = '';
   $('wall').replaceChildren(...rows.map(a => {
     const article = document.createElement('article'); article.className = 'note';
     const text = document.createElement('p'); text.textContent = a.text;
