@@ -4,14 +4,21 @@ exports.handle = async (event, db, reply) => {
   const collection = db.collection('bottledream_answers');
   const method = String(event.httpMethod || event.requestContext?.httpMethod || 'GET').toUpperCase();
   if (method === 'GET') {
+    const query = event.queryStringParameters || {};
+    const questionId = query.question;
+    const receipt = String(query.receipt || '');
+    if (!ids.includes(questionId) || !/^[a-zA-Z0-9-]{16,80}$/.test(receipt)) return reply(403, {error:'请先回答这道题'});
+    const saved = await collection.doc(crypto.createHash('sha256').update(receipt).digest('hex')).get();
+    const own = Array.isArray(saved.data) ? saved.data[0] : saved.data;
+    if (!own || own.questionId !== questionId) return reply(403, {error:'请先回答这道题'});
     const answers = [];
     for (let skip = 0; ; skip += 100) {
-      const page = await collection.orderBy('createdAt', 'desc').skip(skip).limit(100).get();
+      const page = await collection.where({questionId}).orderBy('createdAt', 'desc').skip(skip).limit(100).get();
       const rows = page.data || [];
       answers.push(...rows.map(({ _id, questionId, text, name, createdAt }) => ({ id: _id, questionId, text, name, createdAt })));
       if (rows.length < 100) break;
     }
-    return reply(200, { answers });
+    return reply(200, { answers: [...answers, ...require('./previous-answers.json').filter(a => a.questionId === questionId)] });
   }
   if (method !== 'POST') return reply(405, { error: '不支持的请求方式' });
   let value;
