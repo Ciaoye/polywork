@@ -7,10 +7,20 @@ exports.handle = async (event, db, reply) => {
     const query = event.queryStringParameters || {};
     const questionId = query.question;
     const receipt = String(query.receipt || '');
-    if (!ids.includes(questionId) || !/^[a-zA-Z0-9-]{16,80}$/.test(receipt)) return reply(403, {error:'请先回答这道题'});
-    const saved = await collection.doc(crypto.createHash('sha256').update(receipt).digest('hex')).get();
-    const own = Array.isArray(saved.data) ? saved.data[0] : saved.data;
-    if (!own || own.questionId !== questionId) return reply(403, {error:'请先回答这道题'});
+    if (!ids.includes(questionId)) return reply(400, {error:'题目不存在'});
+    let unlocked = false;
+    if (/^[a-zA-Z0-9-]{16,80}$/.test(receipt)) {
+      const saved = await collection.doc(crypto.createHash('sha256').update(receipt).digest('hex')).get();
+      const own = Array.isArray(saved.data) ? saved.data[0] : saved.data;
+      unlocked = Boolean(own && own.questionId === questionId);
+    }
+    const previous = require('./previous-answers.json').filter(a => a.questionId === questionId);
+    if (!unlocked) {
+      const count = await collection.where({questionId}).count();
+      const page = await collection.where({questionId}).orderBy('createdAt', 'desc').limit(6).get();
+      const recent = (page.data || []).map(({_id,questionId,text,name,createdAt}) => ({id:_id,questionId,text,name,createdAt}));
+      return reply(200, {answers:[...recent,...previous].slice(0,6), total:count.total + previous.length, unlocked:false});
+    }
     const answers = [];
     for (let skip = 0; ; skip += 100) {
       const page = await collection.where({questionId}).orderBy('createdAt', 'desc').skip(skip).limit(100).get();
@@ -18,7 +28,7 @@ exports.handle = async (event, db, reply) => {
       answers.push(...rows.map(({ _id, questionId, text, name, createdAt }) => ({ id: _id, questionId, text, name, createdAt })));
       if (rows.length < 100) break;
     }
-    return reply(200, { answers: [...answers, ...require('./previous-answers.json').filter(a => a.questionId === questionId)] });
+    return reply(200, {answers:[...answers,...previous], total:answers.length + previous.length, unlocked:true});
   }
   if (method !== 'POST') return reply(405, { error: '不支持的请求方式' });
   let value;

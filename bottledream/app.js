@@ -6,6 +6,7 @@ const questions = [
 ];
 const receipts = {};
 for (const q of questions) { try { receipts[q.id] = localStorage.getItem('bottledream-receipt-' + q.id) || ''; } catch {} }
+let unlocked = false, total = 0;
 let active = 0, answers = [], requestId = null, loading = false;
 const drafts = questions.map(() => '');
 const $ = id => document.getElementById(id);
@@ -14,8 +15,11 @@ function render() {
   $('question').textContent = questions[active].text;
   document.querySelectorAll('nav button').forEach((b,i) => b.setAttribute('aria-pressed', String(i === active)));
   const rows = answers.filter(a => a.questionId === questions[active].id);
-  $('answers').hidden = !receipts[questions[active].id];
-  $('count').textContent = `${rows.length} 条`;
+  $('answers').hidden = false;
+  $('answers').classList.toggle('preview', !unlocked);
+  $('unlock').hidden = unlocked || !total;
+  $('unlock').textContent = `提交你的回答查看全部 ${total} 条`;
+  $('count').textContent = `${total} 条`;
   if (rows.length && $('load-status').textContent.includes('这面墙还没有回答')) $('load-status').textContent = '';
   $('wall').replaceChildren(...rows.map(a => {
     const article = document.createElement('article'); article.className = 'note';
@@ -26,21 +30,21 @@ function render() {
 }
 async function load() {
   const questionId = questions[active].id;
-  if (!receipts[questionId]) { answers = []; render(); return false; }
+
 
   loading = true; $('refresh').disabled = true; $('load-status').textContent = '正在取回大家的回答……';
   try {
-    const response = await fetch(API + '?question=' + questionId + '&receipt=' + encodeURIComponent(receipts[questionId]), { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+    const response = await fetch(API + '?question=' + questionId + '&receipt=' + encodeURIComponent(receipts[questionId] || ''), { cache: 'no-store', signal: AbortSignal.timeout(15000) });
     const value = await response.json();
     if (!response.ok || !Array.isArray(value.answers)) throw Error(value.error || '读取失败');
     if (questions[active].id !== questionId) return false;
-    answers = value.answers; render();
+    answers = value.answers; total = value.total; unlocked = value.unlocked; render();
     $('load-status').textContent = answers.some(a => a.questionId === questions[active].id) ? '' : '这面墙还没有回答，欢迎贴上第一张。'; return true;
   } catch { $('load-status').textContent = '暂时没能取回回答，请点“刷新回答”重试。'; return false; }
   finally { loading = false; $('refresh').disabled = false; }
 }
 document.querySelectorAll('nav button').forEach((button,i) => button.addEventListener('click', () => {
-  drafts[active] = $('answer').value; active = i; answers = []; $('answer').value = drafts[i]; requestId = null; $('submit-status').textContent = ''; render(); load();
+  drafts[active] = $('answer').value; active = i; answers = []; total = 0; unlocked = false; $('answer').value = drafts[i]; requestId = null; $('submit-status').textContent = ''; render(); load();
 }));
 $('refresh').addEventListener('click', load);
 $('answer').addEventListener('input', () => { requestId = null; });
